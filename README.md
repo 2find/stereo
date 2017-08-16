@@ -1,10 +1,13 @@
 # stereo
 
-A new flutter plugin project.
+A Flutter plugin for playing music on iOS and Android.
 
-## Getting Started
+## Features
 
-For help getting started with Flutter, view our online
-[documentation](http://flutter.io/).
+**iOS**
+* Toggle play/pause
+* Show music picker which returns song's URL
+* Load song from URL
 
-For help on editing plugin code, view the [documentation](https://flutter.io/platform-plugins/#edit-code).
+## Contributing
+Feel free to open issues and pull requests.
