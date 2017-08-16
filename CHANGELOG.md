@@ -1,3 +1,8 @@
-## [0.0.1] - TODO: Add release date.
+# Changelog
 
-* TODO: Describe initial release.
+**v0.1.0**
+* Initial release.
+* Toggle play/pause.
+* Show music picker which returns song's URL.
+* Load song from URL.
+
