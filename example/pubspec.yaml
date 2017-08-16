@@ -1,0 +1,21 @@
+name: stereo_example
+description: Demonstrates how to use the stereo plugin.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  font_awesome_flutter: 4.7.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  stereo:
+    path: ../
+
+flutter:
+  fonts:
+    - family: FontAwesome
+      fonts:
+        - asset: packages/font_awesome_flutter/fonts/fontawesome.woff
+  uses-material-design: true
