@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:stereo/audio_player.dart';
+import 'package:stereo/stereo.dart';
 
 import 'package:stereo_example/media_player_widget.dart';
 
@@ -14,8 +14,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  AudioPlayer _player = new AudioPlayer();
-
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -29,8 +27,8 @@ class _MyAppState extends State<MyApp> {
                       child: new RaisedButton(
                           child: new Text('Pick a song'),
                           onPressed: () {
-                            _player.showMediaPicker().then((String url) {
-                              _player.loadItemWithURL(url);
+                            Stereo.showMediaPicker().then((String url) {
+                              Stereo.loadItemWithURL(url);
                             });
                           }))),
               new MediaPlayerWidget()
