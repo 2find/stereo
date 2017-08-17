@@ -4,37 +4,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Represents an audio player.
-class AudioPlayer {
-  static AudioPlayer _instance = new AudioPlayer._internal();
-
+class Stereo {
   static const MethodChannel _channel =
-      const MethodChannel('com.mcs.plugins/stereo');
+  const MethodChannel('com.mcs.plugins/stereo');
 
-  VoidCallback togglePlayPauseCallback;
-
-  factory AudioPlayer() {
-    return _instance;
+  Stereo._internal() {
+    Stereo._channel.setMethodCallHandler(Stereo._handleMethodCall);
   }
 
-  AudioPlayer._internal() {
-    _channel.setMethodCallHandler(_handleMethodCall);
-  }
+  static VoidCallback togglePlayPauseCallback;
 
   /// Always returns `0`.
-  Future<int> loadItemWithURL(String url) =>
+  static Future<int> loadItemWithURL(String url) =>
       _channel.invokeMethod('app.loadItemWithURL', url);
 
   /// Returns information about the song the user picked.
-  Future<String> showMediaPicker() {
+  static Future<String> showMediaPicker() {
     return _channel.invokeMethod('app.showMediaPicker');
   }
 
   /// Returns `true` if the player resumed playing, `false` otherwise.
-  Future<bool> togglePlaying() {
+  static Future<bool> togglePlaying() {
     return _channel.invokeMethod('app.togglePlaying');
   }
 
-  Future _handleMethodCall(MethodCall call) async {
+  static Future _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'event.togglePlayPause':
         togglePlayPauseCallback();

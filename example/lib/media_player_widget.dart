@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:stereo/audio_player.dart';
+import 'package:stereo/stereo.dart';
 
 class MediaPlayerWidget extends StatefulWidget {
   @override
@@ -13,15 +13,13 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   static const Icon _pauseIcon = const Icon(FontAwesomeIcons.pause);
   static const Icon _playIcon = const Icon(FontAwesomeIcons.play);
 
-  AudioPlayer _player = new AudioPlayer();
-
   bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
 
-    _player.togglePlayPauseCallback = () => _togglePlaying();
+    Stereo.togglePlayPauseCallback = () => _togglePlaying();
   }
 
   @override
@@ -48,7 +46,7 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   }
 
   void _togglePlaying() {
-    _player
+    Stereo
         .togglePlaying()
         .then((bool state) => setState(() => _isPlaying = state));
   }
