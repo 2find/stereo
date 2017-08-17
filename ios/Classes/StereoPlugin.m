@@ -100,7 +100,9 @@
     _player = [[AVPlayer alloc] initWithPlayerItem:nil];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
 
-    [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_togglePlayPause)];
+    [[[MPRemoteCommandCenter sharedCommandCenter] pauseCommand] addTarget:self action:@selector(_notifyPlayPause:)];
+    [[[MPRemoteCommandCenter sharedCommandCenter] playCommand] addTarget:self action:@selector(_notifyPlayPause:)];
+    [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_notifyPlayPause:)];
 }
 
 - (void)_endAudioSession {
@@ -117,6 +119,10 @@
     AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset automaticallyLoadedAssetKeys:assetKeys];
 
     [_player replaceCurrentItemWithPlayerItem:item];
+}
+
+- (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
+    [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 }
 
 - (void)_showMediaPicker {
