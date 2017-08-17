@@ -18,6 +18,13 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   bool _isPlaying = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    _player.togglePlayPauseCallback = () => _togglePlaying();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new Container(
         height: 80.0,
