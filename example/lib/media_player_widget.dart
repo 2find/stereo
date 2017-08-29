@@ -15,6 +15,8 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
 
   bool _isPlaying = false;
 
+  Stereo _stereo = new Stereo();
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +48,7 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   }
 
   void _togglePlaying() {
-    Stereo
+    _stereo
         .togglePlaying()
         .then((bool state) => setState(() => _isPlaying = state));
   }

@@ -14,6 +14,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  Stereo _stereo = new Stereo();
+
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -27,8 +29,8 @@ class _MyAppState extends State<MyApp> {
                       child: new RaisedButton(
                           child: new Text('Pick a song'),
                           onPressed: () {
-                            Stereo.showMediaPicker().then((String url) {
-                              Stereo.loadItemWithURL(url);
+                            _stereo.showMediaPicker().then((String url) {
+                              _stereo.loadItemWithURL(url);
                             });
                           }))),
               new MediaPlayerWidget()
