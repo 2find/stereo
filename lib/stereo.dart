@@ -25,11 +25,6 @@ class Stereo {
     return _channel.invokeMethod('app.loadItemWithURL', url);
   }
 
-  /// Returns information about the song the user picked.
-  Future<String> showMediaPicker() {
-    return _channel.invokeMethod('app.showMediaPicker');
-  }
-
   /// Returns `true` if the player resumed playing, `false` otherwise.
   Future<bool> togglePlaying() {
     return _channel.invokeMethod('app.togglePlaying');

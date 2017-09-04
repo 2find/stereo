@@ -6,8 +6,8 @@ A Flutter plugin for playing music on iOS and Android.
 
 **iOS**
 * Toggle play/pause
-* Show music picker which returns song's URL
 * Load song from URL
+* Receive events from Control Center
 
 ## Contributing
 Feel free to open issues and pull requests.
