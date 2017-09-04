@@ -22,26 +22,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Stereo _stereo = new Stereo();
 
-  List<FileSystemEntity> _files = <FileSystemEntity>[];
-  StreamSubscription<FileSystemEntity> _stream;
-
-  @override
-  void initState() {
-    getApplicationDocumentsDirectory().then((Directory dir) {
-      _stream = dir.list().listen((FileSystemEntity file) {
-        setState(() => _files.add(file));
-      });
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _stream.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
