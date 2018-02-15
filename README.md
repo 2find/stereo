@@ -1,13 +1,21 @@
-# stereo
+# Stereo plugin for Flutter
 
-A Flutter plugin for playing music on iOS and Android.
+A Flutter plugin for playing music from a file.
 
-## Features
+## Organization
 
-**iOS**
-* Toggle play/pause
-* Load song from URL
-* Receive events from Control Center
+There are three main folders in this repository.
+
+* `doc/`: Documentation.
+* `example/`: Example that demonstrates how to use the plugin.
+* `src/`: Source code.
+
+The folders `example` and `src` contain `.iml` files that each represents an IntelliJ IDEA module.
+
+## Installation
+
+This section will be covered once the plugin has been published.
 
 ## Contributing
-Feel free to open issues and pull requests.
+
+Feel free to contribute by opening issues and/or pull requests. Your feedback is very welcome!

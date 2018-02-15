@@ -12,7 +12,7 @@ dev_dependencies:
     sdk: flutter
 
   stereo:
-    path: ../
+    path: ../src
 
 flutter:
   assets:
