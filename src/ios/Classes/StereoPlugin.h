@@ -4,6 +4,6 @@
 
 @interface StereoPlugin : NSObject <FlutterPlugin>
 
-- (StereoPlugin *)initWithChannel:(FlutterMethodChannel * _Nonnull)channel;
+- (StereoPlugin * _Nonnull)initWithChannel:(FlutterMethodChannel * _Nonnull)channel;
 
 @end

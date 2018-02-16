@@ -1,20 +1,26 @@
 PODS:
   - Flutter (1.0.0)
+  - path_provider (0.0.1):
+    - Flutter
   - stereo (0.1.0):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `/Users/faku99/opt/flutter/bin/cache/artifacts/engine/ios`)
-  - stereo (from `/Users/faku99/Development/flutter/stereo/ios`)
+  - path_provider (from `/Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.1+1/ios`)
+  - stereo (from `/Users/faku99/Development/flutter/stereo/src/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: /Users/faku99/opt/flutter/bin/cache/artifacts/engine/ios
+  path_provider:
+    :path: /Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.1+1/ios
   stereo:
-    :path: /Users/faku99/Development/flutter/stereo/ios
+    :path: /Users/faku99/Development/flutter/stereo/src/ios
 
 SPEC CHECKSUMS:
   Flutter: d674e78c937094a75ac71dd77e921e840bea3dbf
+  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   stereo: aba9d841525230ab89a93bcbd3079709e899f4c3
 
 PODFILE CHECKSUM: 351e02e34b831289961ec3558a535cbd2c4965d2

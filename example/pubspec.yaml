@@ -5,15 +5,19 @@ dependencies:
   flutter:
     sdk: flutter
   font_awesome_flutter: 4.7.2
+  path_provider: 0.2.1+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   stereo:
-    path: ../
+    path: ../src
 
 flutter:
+  assets:
+    - assets/songs/dubstep.mp3
+    - assets/songs/pi.mp3
   fonts:
     - family: FontAwesome
       fonts:

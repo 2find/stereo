@@ -2,15 +2,12 @@
 #import <Flutter/Flutter.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-#import "MCMediaPickerController.h"
 #import "StereoPlugin.h"
 
 @implementation StereoPlugin {
     FlutterMethodChannel *_channel;
-    FlutterViewController *_flutterController;
     BOOL _isPlaying;
     AVPlayer *_player;
-    FlutterResult _result;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
@@ -61,16 +58,6 @@
         else {
             result([FlutterError errorWithCode:@"NO_URL" message:@"No URL was specified." details:nil]);
         }
-    }
-    else if ([@"app.showMediaPicker" isEqualToString:call.method]) {
-        if (_result != nil) {
-            _result([FlutterError errorWithCode:@"MULTIPLE_REQUESTS" message:@"Cancelled by a second request." details:nil]);
-
-            _result = nil;
-        }
-        _result = result;
-
-        [self _showMediaPicker];
     }
     else if ([@"app.togglePlaying" isEqualToString:call.method]) {
         result(@([self _togglePlayPause]));
@@ -123,25 +110,17 @@
 
 - (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
-}
 
-- (void)_showMediaPicker {
-    MCMediaPickerController *picker = [[MCMediaPickerController alloc] initWithResult:_result];
-
-    // If Flutter controller isn't defined, define it.
-    if (_flutterController == nil) {
-        _flutterController = (FlutterViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
-    }
-
-    [_flutterController presentViewController:picker animated:YES completion:nil];
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 - (void)_showMediaPlayerAlert {
+    FlutterViewController *controller = (FlutterViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"There was an error with the music player. Please restart the app." preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *okButton = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
 
     [alert addAction:okButton];
-    [_flutterController presentViewController:alert animated:YES completion:nil];
+    [controller presentViewController:alert animated:YES completion:nil];
 }
 
 - (BOOL)_togglePlayPause {
