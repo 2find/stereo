@@ -9,6 +9,10 @@ flutter:
     androidPackage: com.twofind.stereo
     pluginClass: StereoPlugin
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 dependencies:
   flutter:
     sdk: flutter

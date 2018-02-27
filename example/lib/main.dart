@@ -14,36 +14,51 @@ void main() {
   runApp(new MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+        title: 'Stereo Plugin Example', home: new HomeScreen());
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => new _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   Stereo _stereo = new Stereo();
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-        home: new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Stereo Plugin Example'),
-            ),
-            body: new Column(children: <Widget>[
-              new Flexible(
-                  child: new Center(
-                      child: new Row(children: <Widget>[
-                new Expanded(
-                    child: new RaisedButton(
-                        child: new Text('dubstep.mp3'),
-                        onPressed: () => _playFile('dubstep.mp3'))),
-                new Expanded(
-                    child: new RaisedButton(
-                        child: new Text('pi.mp3'),
-                        onPressed: () => _playFile('pi.mp3')))
-              ]))),
-              new MediaPlayerWidget()
-            ])));
+    return new Scaffold(
+        appBar: new AppBar(title: new Text('Stereo Plugin Example')),
+        body: new Column(children: <Widget>[
+          new Center(
+              heightFactor: 2.0,
+              child: new Text('Choose an action:',
+                  style: new TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20.0))),
+          new Wrap(
+              alignment: WrapAlignment.spaceAround,
+              spacing: 12.0,
+              runSpacing: 8.0,
+              children: <Widget>[
+                new RaisedButton(
+                    child: new Text('Play dubstep.mp3'),
+                    onPressed: () => _playFile('dubstep.mp3')),
+                new RaisedButton(
+                    child: new Text('Play pi.mp3'),
+                    onPressed: () => _playFile('pi.mp3')),
+                new RaisedButton(
+                    child: new Text('Invalid URL'),
+                    onPressed: () => _playFile("invalid_file.mp3"))
+              ]),
+          new Expanded(child: new Container()),
+          new Padding(
+              padding: new EdgeInsets.all(16.0), child: new MediaPlayerWidget())
+        ]));
   }
 
   Future _playFile(String file) async {
@@ -51,9 +66,15 @@ class _MyAppState extends State<MyApp> {
 
     final Directory dir = await getApplicationDocumentsDirectory();
 
-    // iOS needs 'file://' to work. At the moment, we leave it here and we will
-    // deal with it later.
-    _stereo.loadItemWithURL('file://${dir.path}/$file');
+    try {
+      await _stereo.load('${dir.path}/$file');
+    } on StereoFileNotPlayableException {
+      var alert = new AlertDialog(
+          title: new Text('File not playable'),
+          content: new Text('The file you specified is not playable.'));
+
+      showDialog(context: context, child: alert);
+    }
   }
 
   // Don't judge the code for this method, it's for the example...

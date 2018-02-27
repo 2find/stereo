@@ -26,25 +26,13 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-        height: 80.0,
-        child: new Row(children: <Widget>[
-          new Expanded(
-              child: new IconButton(
-                  icon: const Icon(FontAwesomeIcons.stepBackward),
-                  iconSize: 30.0,
-                  onPressed: null)),
-          new Expanded(
-              child: new IconButton(
-                  icon: _isPlaying ? _pauseIcon : _playIcon,
-                  iconSize: 50.0,
-                  onPressed: () => _togglePlaying())),
-          new Expanded(
-              child: new IconButton(
-                  icon: const Icon(FontAwesomeIcons.stepForward),
-                  iconSize: 30.0,
-                  onPressed: null))
-        ]));
+    return new Column(children: <Widget>[
+      new IconButton(
+          icon: _isPlaying ? _pauseIcon : _playIcon,
+          iconSize: 50.0,
+          onPressed: () => _togglePlaying()),
+      new LinearProgressIndicator(value: 0.5)
+    ]);
   }
 
   void _togglePlaying() {

@@ -3,7 +3,19 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+/// Exception thrown when a file is not playable.
+class StereoFileNotPlayableException implements Exception {
+  /// A message describing the error.
+  String message;
+
+  /// Creates a new [StereoFileNotPlayableException] with an optional error
+  /// message.
+  StereoFileNotPlayableException([this.message]);
+}
+
 /// Represents an audio player.
+///
+/// This class is a factory so it has only one instance.
 class Stereo {
   static Stereo _instance = new Stereo._internal();
 
@@ -20,12 +32,18 @@ class Stereo {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  /// Always returns `0`.
-  Future<int> loadItemWithURL(String url) {
-    return _channel.invokeMethod('app.loadItemWithURL', url);
+  /// Loads a file given its URI.
+  ///
+  /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
+  /// a file which is not playable.
+  Future load(String uri) async {
+    int rc = await _channel.invokeMethod('app.loadItemWithURL', uri);
+
+    if (rc == 1) {
+      throw new StereoFileNotPlayableException();
+    }
   }
 
-  /// Returns `true` if the player resumed playing, `false` otherwise.
   Future<bool> togglePlaying() {
     return _channel.invokeMethod('app.togglePlaying');
   }

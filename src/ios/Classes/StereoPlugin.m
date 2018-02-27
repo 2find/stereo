@@ -50,10 +50,9 @@
                 result([FlutterError errorWithCode:@"WRONG_FORMAT" message:@"The specified URL must be a string." details:nil]);
             }
 
-            NSURL *url = [NSURL URLWithString:(NSString *)call.arguments];
-            [self _loadItemWithURL:url];
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"file://%@", (NSString *)call.arguments]];
 
-            result(@0);
+            result(@([self _loadItemWithURL:url]));
         }
         else {
             result([FlutterError errorWithCode:@"NO_URL" message:@"No URL was specified." details:nil]);
@@ -99,13 +98,21 @@
     [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
 }
 
-- (void)_loadItemWithURL:(NSURL * _Nonnull)url {
+- (int)_loadItemWithURL:(NSURL * _Nonnull)url {
     AVAsset *asset = [AVAsset assetWithURL:url];
     NSArray *assetKeys = @[@"playable", @"hasProtectedContent"];
+    
+    // If the asset is not playable, we return `1`. We do this at this point so
+    // the player is not going in a broken state.
+    if (asset.playable == 0) {
+        return 1;
+    }
 
     AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset automaticallyLoadedAssetKeys:assetKeys];
 
     [_player replaceCurrentItemWithPlayerItem:item];
+    
+    return 0;
 }
 
 - (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
