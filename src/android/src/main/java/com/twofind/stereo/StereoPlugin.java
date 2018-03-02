@@ -32,9 +32,11 @@ public class StereoPlugin implements MethodCallHandler {
           result.error("WRONG_FORMAT", "The specified URL must be a string.", null);
         }
 
-        String path = (String)call.arguments;
+        String path = (String) call.arguments;
 
         result.success(load(path));
+      } else {
+        result.error("NO_URL", "No URL was specified.", null);
       }
     } else if (call.method.equals("app.togglePlaying")) {
       result.success(togglePlayPause());
