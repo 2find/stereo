@@ -27,10 +27,20 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return new Column(children: <Widget>[
-      new IconButton(
-          icon: _isPlaying ? _pauseIcon : _playIcon,
-          iconSize: 50.0,
-          onPressed: () => _togglePlaying()),
+      new Wrap(
+        alignment: WrapAlignment.spaceAround,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12.0,
+        runSpacing: 8.0,
+        children: <Widget>[
+          new IconButton(
+              icon: _playIcon, iconSize: 30.0, onPressed: () => _stereo.play()),
+          new IconButton(
+              icon: _isPlaying ? _pauseIcon : _playIcon,
+              iconSize: 50.0,
+              onPressed: () => _togglePlaying())
+        ],
+      ),
       new LinearProgressIndicator(value: 0.5)
     ]);
   }

@@ -20,27 +20,37 @@ public class StereoPlugin implements MethodCallHandler {
    * Plugin registration.
    */
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.mcs.plugins/stereo");
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.twofind.stereo");
     channel.setMethodCallHandler(new StereoPlugin());
   }
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
-    if (call.method.equals("app.loadItemWithURL")) {
+    // load() method.
+    if (call.method.equals("app.load")) {
       if (call.arguments != null) {
         if (!(call.arguments instanceof String)) {
           result.error("WRONG_FORMAT", "The specified URL must be a string.", null);
         }
 
-        String path = (String) call.arguments;
+        String path = (String)call.arguments;
 
         result.success(load(path));
       } else {
         result.error("NO_URL", "No URL was specified.", null);
       }
-    } else if (call.method.equals("app.togglePlaying")) {
+    }
+    // play() method.
+    else if (call.method.equals("app.play")) {
+      play();
+
+      result.success(null);
+    }
+    else if (call.method.equals("app.togglePlaying")) {
       result.success(togglePlayPause());
-    } else {
+    }
+    // Method not implemented.
+    else {
       result.notImplemented();
     }
   }
@@ -71,6 +81,12 @@ public class StereoPlugin implements MethodCallHandler {
     }
 
     return 0;
+  }
+
+  private void play() {
+    if (mediaPlayer != null) {
+      mediaPlayer.start();
+    }
   }
 
   private boolean togglePlayPause() {

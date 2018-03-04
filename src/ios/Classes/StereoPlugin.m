@@ -11,7 +11,7 @@
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-    FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"com.mcs.plugins/stereo" binaryMessenger:[registrar messenger]];
+    FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"com.twofind.stereo" binaryMessenger:[registrar messenger]];
     StereoPlugin* instance = [[StereoPlugin alloc] initWithChannel:channel];
 
     [registrar addMethodCallDelegate:instance channel:channel];
@@ -44,7 +44,8 @@
 #pragma mark - FlutterPlugin methods
 
 - (void)handleMethodCall:(FlutterMethodCall * _Nonnull)call result:(FlutterResult _Nonnull)result {
-    if ([@"app.loadItemWithURL" isEqualToString:call.method]) {
+    // load() method.
+    if ([@"app.load" isEqualToString:call.method]) {
         if (call.arguments != nil) {
             if (![call.arguments isKindOfClass:[NSString class]]) {
                 result([FlutterError errorWithCode:@"WRONG_FORMAT" message:@"The specified URL must be a string." details:nil]);
@@ -58,9 +59,16 @@
             result([FlutterError errorWithCode:@"NO_URL" message:@"No URL was specified." details:nil]);
         }
     }
+    // play() method.
+    else if ([@"app.play" isEqualToString:call.method]) {
+        [self _play];
+        
+        result(nil);
+    }
     else if ([@"app.togglePlaying" isEqualToString:call.method]) {
         result(@([self _togglePlayPause]));
     }
+    // Method not implemented.
     else {
         result(FlutterMethodNotImplemented);
     }
@@ -119,6 +127,12 @@
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 
     return MPRemoteCommandHandlerStatusSuccess;
+}
+
+- (void)_play {
+    [_player play];
+    
+    _isPlaying = true;
 }
 
 - (void)_showMediaPlayerAlert {

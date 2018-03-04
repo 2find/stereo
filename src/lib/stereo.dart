@@ -17,35 +17,45 @@ class StereoFileNotPlayableException implements Exception {
 ///
 /// This class is a factory so it has only one instance.
 class Stereo {
+  /// General instance.
   static Stereo _instance = new Stereo._internal();
 
+  /// Channel used to communicate with the platform.
   static const MethodChannel _channel =
-      const MethodChannel('com.mcs.plugins/stereo');
+      const MethodChannel('com.twofind.stereo');
 
+  /// Callback called when the platform toggle play/pause state.
   static VoidCallback togglePlayPauseCallback;
 
+  /// Constructor.
   factory Stereo() {
     return _instance;
   }
 
+  /// Internal constructor.
   Stereo._internal() {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  /// Loads a file given its URI.
+  /// Sets the data source (URI path) to use.
   ///
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
   /// a file which is not playable.
   Future load(String uri) async {
-    int rc = await _channel.invokeMethod('app.loadItemWithURL', uri);
+    int rc = await _channel.invokeMethod('app.load', uri);
 
     if (rc == 1) {
       throw new StereoFileNotPlayableException();
     }
   }
 
-  Future<bool> togglePlaying() {
-    return _channel.invokeMethod('app.togglePlaying');
+  /// Starts or resumes playback.
+  Future play() async {
+    await _channel.invokeMethod('app.play');
+  }
+
+  Future<bool> togglePlaying() async {
+    return await _channel.invokeMethod('app.togglePlaying');
   }
 
   Future _handleMethodCall(MethodCall call) async {
