@@ -11,7 +11,7 @@
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-    FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"com.mcs.plugins/stereo" binaryMessenger:[registrar messenger]];
+    FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"com.twofind.stereo" binaryMessenger:[registrar messenger]];
     StereoPlugin* instance = [[StereoPlugin alloc] initWithChannel:channel];
 
     [registrar addMethodCallDelegate:instance channel:channel];
@@ -44,24 +44,44 @@
 #pragma mark - FlutterPlugin methods
 
 - (void)handleMethodCall:(FlutterMethodCall * _Nonnull)call result:(FlutterResult _Nonnull)result {
-    if ([@"app.loadItemWithURL" isEqualToString:call.method]) {
+    // isPlaying() method.
+    if ([@"app.isPlaying" isEqualToString:call.method]) {
+        result(@([self _isPlaying]));
+    }
+    // load() method.
+    else if ([@"app.load" isEqualToString:call.method]) {
         if (call.arguments != nil) {
             if (![call.arguments isKindOfClass:[NSString class]]) {
                 result([FlutterError errorWithCode:@"WRONG_FORMAT" message:@"The specified URL must be a string." details:nil]);
             }
 
-            NSURL *url = [NSURL URLWithString:(NSString *)call.arguments];
-            [self _loadItemWithURL:url];
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"file://%@", (NSString *)call.arguments]];
 
-            result(@0);
+            result(@([self _loadItemWithURL:url]));
         }
         else {
             result([FlutterError errorWithCode:@"NO_URL" message:@"No URL was specified." details:nil]);
         }
     }
-    else if ([@"app.togglePlaying" isEqualToString:call.method]) {
-        result(@([self _togglePlayPause]));
+    // pause() method.
+    else if ([@"app.pause" isEqualToString:call.method]) {
+        [self _pause];
+        
+        result(nil);
     }
+    // play() method.
+    else if ([@"app.play" isEqualToString:call.method]) {
+        [self _play];
+        
+        result(nil);
+    }
+    // stop() method.
+    else if ([@"app.stop" isEqualToString:call.method]) {
+        [self _stop];
+        
+        result(nil);
+    }
+    // Method not implemented.
     else {
         result(FlutterMethodNotImplemented);
     }
@@ -85,11 +105,13 @@
     }
 
     _player = [[AVPlayer alloc] initWithPlayerItem:nil];
+    
+    /* TODO: Wait until Android part is implemented.
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
 
     [[[MPRemoteCommandCenter sharedCommandCenter] pauseCommand] addTarget:self action:@selector(_notifyPlayPause:)];
     [[[MPRemoteCommandCenter sharedCommandCenter] playCommand] addTarget:self action:@selector(_notifyPlayPause:)];
-    [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_notifyPlayPause:)];
+    [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_notifyPlayPause:)]; */
 }
 
 - (void)_endAudioSession {
@@ -99,19 +121,55 @@
     [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
 }
 
-- (void)_loadItemWithURL:(NSURL * _Nonnull)url {
+-(bool) _isPlaying {
+    return _isPlaying;
+}
+
+- (int)_loadItemWithURL:(NSURL * _Nonnull)url {
+    [self _pause];
+
     AVAsset *asset = [AVAsset assetWithURL:url];
     NSArray *assetKeys = @[@"playable", @"hasProtectedContent"];
+    
+    // If the asset is not playable, we return `1`. We do this at this point so
+    // the player is not going in a broken state.
+    if (asset.playable == 0) {
+        return 1;
+    }
 
     AVPlayerItem *item = [AVPlayerItem playerItemWithAsset:asset automaticallyLoadedAssetKeys:assetKeys];
 
     [_player replaceCurrentItemWithPlayerItem:item];
+    
+    return 0;
 }
 
+/* TODO: Wait until Android part is implemented.
 - (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 
     return MPRemoteCommandHandlerStatusSuccess;
+} */
+
+- (void)_pause {
+    [_player pause];
+    
+    _isPlaying = false;
+}
+
+- (void)_play {
+    if ([_player currentItem] != nil) {
+        [_player play];
+    
+        _isPlaying = true;
+    }
+}
+
+- (void)_stop {
+    [_player pause];
+    [_player replaceCurrentItemWithPlayerItem:nil];
+    
+    _isPlaying = false;
 }
 
 - (void)_showMediaPlayerAlert {
@@ -121,19 +179,6 @@
 
     [alert addAction:okButton];
     [controller presentViewController:alert animated:YES completion:nil];
-}
-
-- (BOOL)_togglePlayPause {
-    if (_isPlaying) {
-        [_player pause];
-    }
-    else {
-        [_player play];
-    }
-
-    _isPlaying = !_isPlaying;
-
-    return _isPlaying;
 }
 
 @end

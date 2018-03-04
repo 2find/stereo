@@ -12,8 +12,7 @@ class MediaPlayerWidget extends StatefulWidget {
 class _MediaPlayerState extends State<MediaPlayerWidget> {
   static const Icon _pauseIcon = const Icon(FontAwesomeIcons.pause);
   static const Icon _playIcon = const Icon(FontAwesomeIcons.play);
-
-  bool _isPlaying = false;
+  static const Icon _stopIcon = const Icon(FontAwesomeIcons.stop);
 
   Stereo _stereo = new Stereo();
 
@@ -21,35 +20,33 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   void initState() {
     super.initState();
 
-    Stereo.togglePlayPauseCallback = () => _togglePlaying();
+    _stereo.isPlayingNotifier.addListener(() => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-        height: 80.0,
-        child: new Row(children: <Widget>[
-          new Expanded(
-              child: new IconButton(
-                  icon: const Icon(FontAwesomeIcons.stepBackward),
-                  iconSize: 30.0,
-                  onPressed: null)),
-          new Expanded(
-              child: new IconButton(
-                  icon: _isPlaying ? _pauseIcon : _playIcon,
-                  iconSize: 50.0,
-                  onPressed: () => _togglePlaying())),
-          new Expanded(
-              child: new IconButton(
-                  icon: const Icon(FontAwesomeIcons.stepForward),
-                  iconSize: 30.0,
-                  onPressed: null))
-        ]));
-  }
-
-  void _togglePlaying() {
-    _stereo
-        .togglePlaying()
-        .then((bool state) => setState(() => _isPlaying = state));
+    return new Column(children: <Widget>[
+      new Wrap(
+        alignment: WrapAlignment.spaceAround,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12.0,
+        runSpacing: 8.0,
+        children: <Widget>[
+          new IconButton(
+              icon: _playIcon, iconSize: 30.0, onPressed: () => _stereo.play()),
+          new IconButton(
+              icon: _pauseIcon,
+              iconSize: 30.0,
+              onPressed: () => _stereo.pause()),
+          new IconButton(
+              icon: _stopIcon, iconSize: 30.0, onPressed: () => _stereo.stop()),
+          new IconButton(
+              icon: _stereo.isPlaying ? _pauseIcon : _playIcon,
+              iconSize: 50.0,
+              onPressed: null)
+        ],
+      ),
+      new LinearProgressIndicator(value: 0.5)
+    ]);
   }
 }

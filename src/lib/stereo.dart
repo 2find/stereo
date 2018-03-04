@@ -3,40 +3,89 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+/// Exception thrown when a file is not playable.
+class StereoFileNotPlayableException implements Exception {
+  /// A message describing the error.
+  String message;
+
+  /// Creates a new [StereoFileNotPlayableException] with an optional error
+  /// message.
+  StereoFileNotPlayableException([this.message]);
+}
+
 /// Represents an audio player.
+///
+/// This class is a factory so it has only one instance.
 class Stereo {
+  /// General instance.
   static Stereo _instance = new Stereo._internal();
 
+  /// Channel used to communicate with the platform.
   static const MethodChannel _channel =
-      const MethodChannel('com.mcs.plugins/stereo');
+      const MethodChannel('com.twofind.stereo');
 
-  static VoidCallback togglePlayPauseCallback;
-
+  /// Constructor.
   factory Stereo() {
     return _instance;
   }
 
+  /// Internal constructor.
   Stereo._internal() {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  /// Always returns `0`.
-  Future<int> loadItemWithURL(String url) {
-    return _channel.invokeMethod('app.loadItemWithURL', url);
+  /// Notifier to notify listeners every time the Stereo player state changes.
+  ValueNotifier<bool> _isPlayingNotifier = new ValueNotifier(false);
+
+  /// Whether the Stereo player is playing.
+  bool get isPlaying => _isPlayingNotifier.value;
+
+  /// Notifier to get notified every time the Stereo player state changes.
+  ValueNotifier<bool> get isPlayingNotifier => _isPlayingNotifier;
+
+  /// Sets the data source (URI path) to use.
+  ///
+  /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
+  /// a file which is not playable.
+  Future load(String uri) async {
+    int rc = await _channel.invokeMethod('app.load', uri);
+
+    _isPlayingNotifier.value = await _isPlaying();
+
+    if (rc == 1) {
+      throw new StereoFileNotPlayableException();
+    }
   }
 
-  /// Returns `true` if the player resumed playing, `false` otherwise.
-  Future<bool> togglePlaying() {
-    return _channel.invokeMethod('app.togglePlaying');
+  /// Pauses playback.
+  Future pause() async {
+    await _channel.invokeMethod('app.pause');
+
+    _isPlayingNotifier.value = await _isPlaying();
+  }
+
+  /// Starts or resumes playback.
+  Future play() async {
+    await _channel.invokeMethod('app.play');
+
+    _isPlayingNotifier.value = await _isPlaying();
+  }
+
+  /// Stops playback.
+  Future stop() async {
+    await _channel.invokeMethod('app.stop');
+
+    _isPlayingNotifier.value = await _isPlaying();
   }
 
   Future _handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'event.togglePlayPause':
-        togglePlayPauseCallback();
-        break;
       default:
         print('[ERROR] Channel method ${call.method} not implemented.');
     }
+  }
+
+  Future<bool> _isPlaying() async {
+    return await _channel.invokeMethod('app.isPlaying');
   }
 }
