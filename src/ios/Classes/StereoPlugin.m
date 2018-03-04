@@ -134,6 +134,9 @@
     // If the asset is not playable, we return `1`. We do this at this point so
     // the player is not going in a broken state.
     if (asset.playable == 0) {
+        // Set duration at 00:00.
+        [_channel invokeMethod:@"platform.duration" arguments:@(0)];
+        
         return 1;
     }
 
@@ -141,10 +144,16 @@
 
     [_player replaceCurrentItemWithPlayerItem:item];
     
+    // Send new duration to the application.
+    int seconds = (int)CMTimeGetSeconds(asset.duration);
+    NSLog(@"item.duration = %f, seconds = %d\n", CMTimeGetSeconds(item.duration), seconds);
+    [_channel invokeMethod:@"platform.duration" arguments:@(seconds)];
+    
     return 0;
 }
 
-/* TODO: Wait until Android part is implemented.
+/* TODO: Wait until Android part is implemented. How to manage this option?
+ * Parameter or compilation option?
 - (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 

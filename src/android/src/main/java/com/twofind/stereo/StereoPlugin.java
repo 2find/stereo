@@ -15,12 +15,13 @@ import java.io.IOException;
  */
 public class StereoPlugin implements MethodCallHandler {
   private MediaPlayer mediaPlayer;
+  private static MethodChannel channel;
 
   /**
    * Plugin registration.
    */
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "com.twofind.stereo");
+    channel = new MethodChannel(registrar.messenger(), "com.twofind.stereo");
     channel.setMethodCallHandler(new StereoPlugin());
   }
 
@@ -87,15 +88,14 @@ public class StereoPlugin implements MethodCallHandler {
 
     try {
       mediaPlayer.setDataSource(path);
+      mediaPlayer.prepare();
     } catch (IOException e) {
+      channel.invokeMethod("platform.duration", 0);
       return 1;
     }
 
-    try {
-      mediaPlayer.prepare();
-    } catch (IOException e) {
-      return 1;
-    }
+    // Send duration to the application.
+    channel.invokeMethod("platform.duration", mediaPlayer.getDuration() / 1000);
 
     return 0;
   }

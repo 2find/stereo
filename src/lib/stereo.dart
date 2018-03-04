@@ -34,6 +34,18 @@ class Stereo {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
+  /// Notifier to notify listeners every time the duration of the currently
+  /// loaded file changes.
+  ValueNotifier<Duration> _durationNotifier =
+      new ValueNotifier(new Duration(seconds: 0));
+
+  /// Duration of the currently loaded file.
+  Duration get duration => _durationNotifier.value;
+
+  /// Notifier to get notified every time the duration of the currently loaded
+  /// file changes.
+  ValueNotifier<Duration> get durationNotifier => _durationNotifier;
+
   /// Notifier to notify listeners every time the Stereo player state changes.
   ValueNotifier<bool> _isPlayingNotifier = new ValueNotifier(false);
 
@@ -80,6 +92,10 @@ class Stereo {
 
   Future _handleMethodCall(MethodCall call) async {
     switch (call.method) {
+      case 'platform.duration':
+        print('Got duration: ${call.arguments}');
+        durationNotifier.value = new Duration(seconds: call.arguments);
+        break;
       default:
         print('[ERROR] Channel method ${call.method} not implemented.');
     }

@@ -2,6 +2,7 @@ analyzer
 args
 barback
 csslib
+intl
 logging
 
 Copyright 2013, the Dart project authors. All rights reserved.

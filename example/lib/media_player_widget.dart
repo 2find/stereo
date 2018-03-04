@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import 'package:intl/intl.dart';
+
 import 'package:stereo/stereo.dart';
 
 class MediaPlayerWidget extends StatefulWidget {
@@ -10,16 +12,31 @@ class MediaPlayerWidget extends StatefulWidget {
 }
 
 class _MediaPlayerState extends State<MediaPlayerWidget> {
+  /// Pause icon.
   static const Icon _pauseIcon = const Icon(FontAwesomeIcons.pause);
+
+  /// Play icon.
   static const Icon _playIcon = const Icon(FontAwesomeIcons.play);
+
+  /// Stop icon.
   static const Icon _stopIcon = const Icon(FontAwesomeIcons.stop);
 
+  // Used to format duration.
+  static NumberFormat _twoDigits = new NumberFormat('00', 'en_GB');
+
   Stereo _stereo = new Stereo();
+
+  /// Returns the duration as a formatted string.
+  String _formatDuration() {
+    return '${_twoDigits.format(_stereo.duration.inSeconds / 60)}:${_twoDigits
+        .format(_stereo.duration.inSeconds % 60)}';
+  }
 
   @override
   void initState() {
     super.initState();
 
+    _stereo.durationNotifier.addListener(() => setState(() {}));
     _stereo.isPlayingNotifier.addListener(() => setState(() {}));
   }
 
@@ -46,7 +63,15 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
               onPressed: null)
         ],
       ),
-      new LinearProgressIndicator(value: 0.5)
+      new Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
+        new Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: new Text('00:00')),
+        new Expanded(child: new LinearProgressIndicator(value: 0.5)),
+        new Padding(
+            padding: const EdgeInsets.only(left: 4.0),
+            child: new Text(_formatDuration()))
+      ])
     ]);
   }
 }
