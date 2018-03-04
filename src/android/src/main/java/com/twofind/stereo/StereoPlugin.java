@@ -26,8 +26,12 @@ public class StereoPlugin implements MethodCallHandler {
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
+    // isPlaying() method.
+    if (call.method.equals("app.isPlaying")) {
+      result.success(isPlaying());
+    }
     // load() method.
-    if (call.method.equals("app.load")) {
+    else if (call.method.equals("app.load")) {
       if (call.arguments != null) {
         if (!(call.arguments instanceof String)) {
           result.error("WRONG_FORMAT", "The specified URL must be a string.", null);
@@ -58,13 +62,18 @@ public class StereoPlugin implements MethodCallHandler {
 
       result.success(null);
     }
-    else if (call.method.equals("app.togglePlaying")) {
-      result.success(togglePlayPause());
-    }
     // Method not implemented.
     else {
       result.notImplemented();
     }
+  }
+
+  private boolean isPlaying() {
+    if (mediaPlayer != null) {
+      return mediaPlayer.isPlaying();
+    }
+
+    return false;
   }
 
   private int load(String path) {
@@ -79,16 +88,12 @@ public class StereoPlugin implements MethodCallHandler {
     try {
       mediaPlayer.setDataSource(path);
     } catch (IOException e) {
-      e.printStackTrace();
-
       return 1;
     }
 
     try {
       mediaPlayer.prepare();
     } catch (IOException e) {
-      e.printStackTrace();
-
       return 1;
     }
 
@@ -114,20 +119,5 @@ public class StereoPlugin implements MethodCallHandler {
 
       mediaPlayer = null;
     }
-  }
-
-  private boolean togglePlayPause() {
-    // Avoid NullPointerException exceptions.
-    if (mediaPlayer == null) {
-      return false;
-    }
-
-    if (mediaPlayer.isPlaying()) {
-      mediaPlayer.pause();
-    } else {
-      mediaPlayer.start();
-    }
-
-    return mediaPlayer.isPlaying();
   }
 }

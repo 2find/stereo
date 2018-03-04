@@ -14,15 +14,13 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   static const Icon _playIcon = const Icon(FontAwesomeIcons.play);
   static const Icon _stopIcon = const Icon(FontAwesomeIcons.stop);
 
-  bool _isPlaying = false;
-
   Stereo _stereo = new Stereo();
 
   @override
   void initState() {
     super.initState();
-    
-    Stereo.togglePlayPauseCallback = () => _togglePlaying();
+
+    _stereo.isPlayingNotifier.addListener(() => setState(() {}));
   }
 
   @override
@@ -37,24 +35,18 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
           new IconButton(
               icon: _playIcon, iconSize: 30.0, onPressed: () => _stereo.play()),
           new IconButton(
-              icon: _isPlaying ? _pauseIcon : _playIcon,
-              iconSize: 50.0,
-              onPressed: () => _togglePlaying()),
-          new IconButton(
               icon: _pauseIcon,
               iconSize: 30.0,
               onPressed: () => _stereo.pause()),
           new IconButton(
-              icon: _stopIcon, iconSize: 30.0, onPressed: () => _stereo.stop())
+              icon: _stopIcon, iconSize: 30.0, onPressed: () => _stereo.stop()),
+          new IconButton(
+              icon: _stereo.isPlaying ? _pauseIcon : _playIcon,
+              iconSize: 50.0,
+              onPressed: null)
         ],
       ),
       new LinearProgressIndicator(value: 0.5)
     ]);
-  }
-
-  void _togglePlaying() {
-    _stereo
-        .togglePlaying()
-        .then((bool state) => setState(() => _isPlaying = state));
   }
 }

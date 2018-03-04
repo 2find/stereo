@@ -24,9 +24,6 @@ class Stereo {
   static const MethodChannel _channel =
       const MethodChannel('com.twofind.stereo');
 
-  /// Callback called when the platform toggle play/pause state.
-  static VoidCallback togglePlayPauseCallback;
-
   /// Constructor.
   factory Stereo() {
     return _instance;
@@ -37,12 +34,23 @@ class Stereo {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
+  /// Notifier to notify listeners every time the Stereo player state changes.
+  ValueNotifier<bool> _isPlayingNotifier = new ValueNotifier(false);
+
+  /// Whether the Stereo player is playing.
+  bool get isPlaying => _isPlayingNotifier.value;
+
+  /// Notifier to get notified every time the Stereo player state changes.
+  ValueNotifier<bool> get isPlayingNotifier => _isPlayingNotifier;
+
   /// Sets the data source (URI path) to use.
   ///
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
   /// a file which is not playable.
   Future load(String uri) async {
     int rc = await _channel.invokeMethod('app.load', uri);
+
+    _isPlayingNotifier.value = await _isPlaying();
 
     if (rc == 1) {
       throw new StereoFileNotPlayableException();
@@ -52,29 +60,32 @@ class Stereo {
   /// Pauses playback.
   Future pause() async {
     await _channel.invokeMethod('app.pause');
+
+    _isPlayingNotifier.value = await _isPlaying();
   }
 
   /// Starts or resumes playback.
   Future play() async {
     await _channel.invokeMethod('app.play');
+
+    _isPlayingNotifier.value = await _isPlaying();
   }
 
   /// Stops playback.
   Future stop() async {
     await _channel.invokeMethod('app.stop');
-  }
 
-  Future<bool> togglePlaying() async {
-    return await _channel.invokeMethod('app.togglePlaying');
+    _isPlayingNotifier.value = await _isPlaying();
   }
 
   Future _handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'event.togglePlayPause':
-        togglePlayPauseCallback();
-        break;
       default:
         print('[ERROR] Channel method ${call.method} not implemented.');
     }
+  }
+
+  Future<bool> _isPlaying() async {
+    return await _channel.invokeMethod('app.isPlaying');
   }
 }
