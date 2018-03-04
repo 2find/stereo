@@ -40,6 +40,12 @@ public class StereoPlugin implements MethodCallHandler {
         result.error("NO_URL", "No URL was specified.", null);
       }
     }
+    // pause() method.
+    else if (call.method.equals("app.pause")) {
+      pause();
+
+      result.success(null);
+    }
     // play() method.
     else if (call.method.equals("app.play")) {
       play();
@@ -83,6 +89,12 @@ public class StereoPlugin implements MethodCallHandler {
     return 0;
   }
 
+  private void pause() {
+    if (mediaPlayer != null) {
+      mediaPlayer.pause();
+    }
+  }
+
   private void play() {
     if (mediaPlayer != null) {
       mediaPlayer.start();
@@ -90,6 +102,11 @@ public class StereoPlugin implements MethodCallHandler {
   }
 
   private boolean togglePlayPause() {
+    // Avoid NullPointerException exceptions.
+    if (mediaPlayer == null) {
+      return false;
+    }
+
     if (mediaPlayer.isPlaying()) {
       mediaPlayer.pause();
     } else {

@@ -59,6 +59,12 @@
             result([FlutterError errorWithCode:@"NO_URL" message:@"No URL was specified." details:nil]);
         }
     }
+    // pause() method.
+    else if ([@"app.pause" isEqualToString:call.method]) {
+        [self _pause];
+        
+        result(nil);
+    }
     // play() method.
     else if ([@"app.play" isEqualToString:call.method]) {
         [self _play];
@@ -127,6 +133,12 @@
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 
     return MPRemoteCommandHandlerStatusSuccess;
+}
+
+- (void)_pause {
+    [_player pause];
+    
+    _isPlaying = false;
 }
 
 - (void)_play {

@@ -38,7 +38,12 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
           new IconButton(
               icon: _isPlaying ? _pauseIcon : _playIcon,
               iconSize: 50.0,
-              onPressed: () => _togglePlaying())
+              onPressed: () => _togglePlaying()),
+          new IconButton(
+              icon: _pauseIcon,
+              iconSize: 30.0,
+              onPressed: () => _stereo.pause(),
+          )
         ],
       ),
       new LinearProgressIndicator(value: 0.5)

@@ -49,6 +49,11 @@ class Stereo {
     }
   }
 
+  /// Pauses playback.
+  Future pause() async {
+    await _channel.invokeMethod('app.pause');
+  }
+
   /// Starts or resumes playback.
   Future play() async {
     await _channel.invokeMethod('app.play');
