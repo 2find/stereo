@@ -59,6 +59,11 @@ class Stereo {
     await _channel.invokeMethod('app.play');
   }
 
+  /// Stops playback.
+  Future stop() async {
+    await _channel.invokeMethod('app.stop');
+  }
+
   Future<bool> togglePlaying() async {
     return await _channel.invokeMethod('app.togglePlaying');
   }

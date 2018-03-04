@@ -52,6 +52,12 @@ public class StereoPlugin implements MethodCallHandler {
 
       result.success(null);
     }
+    // stop() method.
+    else if (call.method.equals("app.stop")) {
+      stop();
+
+      result.success(null);
+    }
     else if (call.method.equals("app.togglePlaying")) {
       result.success(togglePlayPause());
     }
@@ -98,6 +104,15 @@ public class StereoPlugin implements MethodCallHandler {
   private void play() {
     if (mediaPlayer != null) {
       mediaPlayer.start();
+    }
+  }
+
+  private void stop() {
+    if (mediaPlayer != null) {
+      mediaPlayer.stop();
+      mediaPlayer.release();
+
+      mediaPlayer = null;
     }
   }
 

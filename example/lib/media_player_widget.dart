@@ -12,6 +12,7 @@ class MediaPlayerWidget extends StatefulWidget {
 class _MediaPlayerState extends State<MediaPlayerWidget> {
   static const Icon _pauseIcon = const Icon(FontAwesomeIcons.pause);
   static const Icon _playIcon = const Icon(FontAwesomeIcons.play);
+  static const Icon _stopIcon = const Icon(FontAwesomeIcons.stop);
 
   bool _isPlaying = false;
 
@@ -20,7 +21,7 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   @override
   void initState() {
     super.initState();
-
+    
     Stereo.togglePlayPauseCallback = () => _togglePlaying();
   }
 
@@ -42,8 +43,9 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
           new IconButton(
               icon: _pauseIcon,
               iconSize: 30.0,
-              onPressed: () => _stereo.pause(),
-          )
+              onPressed: () => _stereo.pause()),
+          new IconButton(
+              icon: _stopIcon, iconSize: 30.0, onPressed: () => _stereo.stop())
         ],
       ),
       new LinearProgressIndicator(value: 0.5)

@@ -71,6 +71,12 @@
         
         result(nil);
     }
+    // stop() method.
+    else if ([@"app.stop" isEqualToString:call.method]) {
+        [self _stop];
+        
+        result(nil);
+    }
     else if ([@"app.togglePlaying" isEqualToString:call.method]) {
         result(@([self _togglePlayPause]));
     }
@@ -145,6 +151,13 @@
     [_player play];
     
     _isPlaying = true;
+}
+
+- (void)_stop {
+    [_player pause];
+    [_player replaceCurrentItemWithPlayerItem:nil];
+    
+    _isPlaying = false;
 }
 
 - (void)_showMediaPlayerAlert {
