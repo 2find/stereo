@@ -2,6 +2,7 @@ package com.twofind.stereo;
 
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -16,6 +17,9 @@ import java.io.IOException;
 public class StereoPlugin implements MethodCallHandler {
   private MediaPlayer mediaPlayer;
   private static MethodChannel channel;
+
+  // To handle position updates.
+  private final Handler handler = new Handler();
 
   /**
    * Plugin registration.
@@ -78,11 +82,7 @@ public class StereoPlugin implements MethodCallHandler {
   }
 
   private int load(String path) {
-    if (mediaPlayer != null) {
-      mediaPlayer.stop();
-      mediaPlayer.release();
-      mediaPlayer = null;
-    }
+    stop();
 
     mediaPlayer = new MediaPlayer();
 
@@ -103,21 +103,49 @@ public class StereoPlugin implements MethodCallHandler {
   private void pause() {
     if (mediaPlayer != null) {
       mediaPlayer.pause();
+      // Stop sending position to the application.
+      handler.removeCallbacks(updatePosition);
     }
   }
 
   private void play() {
     if (mediaPlayer != null) {
+      // Start sending position to the application.
+      handler.post(updatePosition);
       mediaPlayer.start();
     }
   }
 
   private void stop() {
     if (mediaPlayer != null) {
+      // Reset duration and position.
+      handler.removeCallbacks(updatePosition);
+      channel.invokeMethod("platform.duration", 0);
+      channel.invokeMethod("platform.position", 0);
+
       mediaPlayer.stop();
       mediaPlayer.release();
 
       mediaPlayer = null;
     }
   }
+
+  private final Runnable updatePosition = new Runnable() {
+    @Override
+    public void run() {
+      try {
+        if (mediaPlayer.isPlaying() == false) {
+          handler.removeCallbacks(updatePosition);
+        }
+
+        // Send position (seconds) to the application.
+        channel.invokeMethod("platform.position", mediaPlayer.getCurrentPosition() / 1000);
+
+        // Update every 300ms.
+        handler.postDelayed(updatePosition, 300);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  };
 }

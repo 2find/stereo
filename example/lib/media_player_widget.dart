@@ -27,9 +27,13 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
   Stereo _stereo = new Stereo();
 
   /// Returns the duration as a formatted string.
-  String _formatDuration() {
-    return '${_twoDigits.format(_stereo.duration.inSeconds / 60)}:${_twoDigits
-        .format(_stereo.duration.inSeconds % 60)}';
+  String _formatDuration(Duration duration) {
+    return '${_twoDigits.format(duration.inSeconds / 60)}:${_twoDigits
+        .format(duration.inSeconds % 60)}';
+  }
+
+  double _getProgress() {
+    return _stereo.position.inSeconds / _stereo.duration.inSeconds;
   }
 
   @override
@@ -38,6 +42,7 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
 
     _stereo.durationNotifier.addListener(() => setState(() {}));
     _stereo.isPlayingNotifier.addListener(() => setState(() {}));
+    _stereo.positionNotifier.addListener(() => setState(() {}));
   }
 
   @override
@@ -64,13 +69,15 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
         ],
       ),
       new Row(mainAxisSize: MainAxisSize.max, children: <Widget>[
-        new Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-            child: new Text('00:00')),
-        new Expanded(child: new LinearProgressIndicator(value: 0.5)),
-        new Padding(
-            padding: const EdgeInsets.only(left: 4.0),
-            child: new Text(_formatDuration()))
+        new Container(
+            width: 50.0,
+            child: new Text(_formatDuration(_stereo.position),
+                textAlign: TextAlign.left)),
+        new Expanded(child: new LinearProgressIndicator(value: _getProgress())),
+        new Container(
+            width: 50.0,
+            child: new Text(_formatDuration(_stereo.duration),
+                textAlign: TextAlign.right))
       ])
     ]);
   }

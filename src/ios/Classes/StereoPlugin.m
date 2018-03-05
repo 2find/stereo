@@ -8,6 +8,7 @@
     FlutterMethodChannel *_channel;
     BOOL _isPlaying;
     AVPlayer *_player;
+    id _timeObserver;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
@@ -131,6 +132,9 @@
     AVAsset *asset = [AVAsset assetWithURL:url];
     NSArray *assetKeys = @[@"playable", @"hasProtectedContent"];
     
+    // Set position to 00:00.
+    [_channel invokeMethod:@"platform.position" arguments:@(0)];
+    
     // If the asset is not playable, we return `1`. We do this at this point so
     // the player is not going in a broken state.
     if (asset.playable == 0) {
@@ -146,8 +150,13 @@
     
     // Send new duration to the application.
     int seconds = (int)CMTimeGetSeconds(asset.duration);
-    NSLog(@"item.duration = %f, seconds = %d\n", CMTimeGetSeconds(item.duration), seconds);
     [_channel invokeMethod:@"platform.duration" arguments:@(seconds)];
+    
+    // Send position to the application every 300ms.
+    CMTime interval = CMTimeMakeWithSeconds(0.3, NSEC_PER_SEC);
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
+        [self _updatePosition:time];
+    }];
     
     return 0;
 }
@@ -161,22 +170,32 @@
 } */
 
 - (void)_pause {
-    [_player pause];
-    
     _isPlaying = false;
+    
+    [_player pause];
+    [_player removeTimeObserver:_timeObserver];
+    _timeObserver = nil;
 }
 
 - (void)_play {
     if ([_player currentItem] != nil) {
-        [_player play];
-    
         _isPlaying = true;
+        
+        CMTime interval = CMTimeMakeWithSeconds(0.3, NSEC_PER_SEC);
+        _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
+            [self _updatePosition:time];
+        }];
+        [_player play];
     }
 }
 
 - (void)_stop {
     [_player pause];
     [_player replaceCurrentItemWithPlayerItem:nil];
+    
+    // Reset duration and position.
+    [_channel invokeMethod:@"platform.duration" arguments:@(0)];
+    [_channel invokeMethod:@"platform.position" arguments:@(0)];
     
     _isPlaying = false;
 }
@@ -188,6 +207,14 @@
 
     [alert addAction:okButton];
     [controller presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)_updatePosition:(CMTime)time {
+    if (_isPlaying) {
+        int seconds = (int)CMTimeGetSeconds(time);
+    
+        [_channel invokeMethod:@"platform.position" arguments:@(seconds)];
+    }
 }
 
 @end
