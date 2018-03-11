@@ -8,6 +8,7 @@
     FlutterMethodChannel *_channel;
     BOOL _isPlaying;
     AVPlayer *_player;
+    id _timeObserver;
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
@@ -75,6 +76,22 @@
         
         result(nil);
     }
+    // seek() method.
+    else if ([@"app.seek" isEqualToString:call.method]) {
+        if (call.arguments != nil) {
+            if (![call.arguments isKindOfClass:[NSNumber class]]) {
+                result([FlutterError errorWithCode:@"INVALID_POSITION_TYPE" message:@"Position must be specified by an integer." details:nil]);
+            }
+            
+            int seconds = [(NSNumber *)call.arguments intValue];
+            
+            [self _seek:seconds];
+            
+            result(nil);
+        } else {
+            result([FlutterError errorWithCode:@"NO_POSITION" message:@"No position was specified." details:nil]);
+        }
+    }
     // stop() method.
     else if ([@"app.stop" isEqualToString:call.method]) {
         [self _stop];
@@ -114,6 +131,10 @@
     [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_notifyPlayPause:)]; */
 }
 
+-(void)_completionHandler:(NSNotification *)notification {
+    [_channel invokeMethod:@"platform.completion" arguments:nil];
+}
+
 - (void)_endAudioSession {
     AVAudioSession *session = [AVAudioSession sharedInstance];
     [session setActive:NO error:nil];
@@ -131,9 +152,15 @@
     AVAsset *asset = [AVAsset assetWithURL:url];
     NSArray *assetKeys = @[@"playable", @"hasProtectedContent"];
     
+    // Set position to 00:00.
+    [_channel invokeMethod:@"platform.position" arguments:@(0)];
+    
     // If the asset is not playable, we return `1`. We do this at this point so
     // the player is not going in a broken state.
     if (asset.playable == 0) {
+        // Set duration at 00:00.
+        [_channel invokeMethod:@"platform.duration" arguments:@(0)];
+        
         return 1;
     }
 
@@ -141,10 +168,28 @@
 
     [_player replaceCurrentItemWithPlayerItem:item];
     
+    // Send new duration to the application.
+    int seconds = (int)CMTimeGetSeconds(asset.duration);
+    [_channel invokeMethod:@"platform.duration" arguments:@(seconds)];
+    
+    // Create a weak reference to `self` so don't go into a retain cycle.
+    // Credits to: https://stackoverflow.com/a/14556706/3238070
+    __unsafe_unretained typeof(self) weakSelf = self;
+    
+    // Send position to the application every 200ms.
+    CMTime interval = CMTimeMakeWithSeconds(0.2, NSEC_PER_SEC);
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
+        [weakSelf _updatePosition:time];
+    }];
+    
+    // Add notification handler when item is done playing.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_completionHandler:) name:AVPlayerItemDidPlayToEndTimeNotification object:item];
+    
     return 0;
 }
 
-/* TODO: Wait until Android part is implemented.
+/* TODO: Wait until Android part is implemented. How to manage this option?
+ * Parameter or compilation option?
 - (MPRemoteCommandHandlerStatus)_notifyPlayPause:(MPRemoteCommandEvent *)event {
     [_channel invokeMethod:@"event.togglePlayPause" arguments:nil];
 
@@ -152,22 +197,45 @@
 } */
 
 - (void)_pause {
-    [_player pause];
-    
     _isPlaying = false;
+    
+    [_player pause];
+    [_player removeTimeObserver:_timeObserver];
+    _timeObserver = nil;
 }
 
 - (void)_play {
     if ([_player currentItem] != nil) {
-        [_player play];
-    
         _isPlaying = true;
+        
+        // Create a weak reference to `self` so don't go into a retain cycle.
+        // Credits to: https://stackoverflow.com/a/14556706/3238070
+        __unsafe_unretained typeof(self) weakSelf = self;
+        
+        // Send position to the application every 200ms.
+        CMTime interval = CMTimeMakeWithSeconds(0.2, NSEC_PER_SEC);
+        _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
+            [weakSelf _updatePosition:time];
+        }];
+        [_player play];
     }
+}
+
+- (void)_seek:(int)seconds {
+    CMTime time = CMTimeMake(seconds, 1);
+    [_player seekToTime:time];
+    
+    // Update position even if the player isn't playing.
+    [_channel invokeMethod:@"platform.position" arguments:@(seconds)];
 }
 
 - (void)_stop {
     [_player pause];
     [_player replaceCurrentItemWithPlayerItem:nil];
+    
+    // Reset duration and position.
+    [_channel invokeMethod:@"platform.duration" arguments:@(0)];
+    [_channel invokeMethod:@"platform.position" arguments:@(0)];
     
     _isPlaying = false;
 }
@@ -179,6 +247,14 @@
 
     [alert addAction:okButton];
     [controller presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)_updatePosition:(CMTime)time {
+    if (_isPlaying) {
+        int seconds = (int)CMTimeGetSeconds(time);
+    
+        [_channel invokeMethod:@"platform.position" arguments:@(seconds)];
+    }
 }
 
 @end
