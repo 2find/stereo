@@ -28,12 +28,20 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
 
   /// Returns the duration as a formatted string.
   String _formatDuration(Duration duration) {
-    return '${_twoDigits.format(duration.inSeconds / 60)}:${_twoDigits
+    return '${_twoDigits.format(duration.inSeconds ~/ 60)}:${_twoDigits
         .format(duration.inSeconds % 60)}';
   }
 
-  double _getProgress() {
-    return _stereo.position.inSeconds / _stereo.duration.inSeconds;
+  /// Returns the slider value.
+  double _getSliderValue() {
+    int position = _stereo.position.inSeconds;
+    if (position <= 0) {
+      return 0.0;
+    } else if (position >= _stereo.duration.inSeconds) {
+      return _stereo.duration.inSeconds.toDouble();
+    } else {
+      return position.toDouble();
+    }
   }
 
   @override
@@ -43,6 +51,8 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
     _stereo.durationNotifier.addListener(() => setState(() {}));
     _stereo.isPlayingNotifier.addListener(() => setState(() {}));
     _stereo.positionNotifier.addListener(() => setState(() {}));
+
+    _stereo.completionHandler = () => _stereo.stop();
   }
 
   @override
@@ -62,6 +72,8 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
               onPressed: () => _stereo.pause()),
           new IconButton(
               icon: _stopIcon, iconSize: 30.0, onPressed: () => _stereo.stop()),
+          // This button is disabled since it's only there to show the current
+          // state of the player.
           new IconButton(
               icon: _stereo.isPlaying ? _pauseIcon : _playIcon,
               iconSize: 50.0,
@@ -73,10 +85,15 @@ class _MediaPlayerState extends State<MediaPlayerWidget> {
             width: 50.0,
             child: new Text(_formatDuration(_stereo.position),
                 textAlign: TextAlign.left)),
-        new Expanded(child: new LinearProgressIndicator(value: _getProgress())),
+        new Expanded(
+            child: new Slider(
+                value: _getSliderValue(),
+                max: _stereo.duration.inSeconds.toDouble(),
+                onChanged: (double newValue) =>
+                    _stereo.seek(new Duration(seconds: newValue.ceil())))),
         new Container(
             width: 50.0,
-            child: new Text(_formatDuration(_stereo.duration),
+            child: new Text('-' + _formatDuration(_stereo.remaining),
                 textAlign: TextAlign.right))
       ])
     ]);

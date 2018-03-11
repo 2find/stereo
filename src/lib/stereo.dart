@@ -13,6 +13,16 @@ class StereoFileNotPlayableException implements Exception {
   StereoFileNotPlayableException([this.message]);
 }
 
+/// Exception thrown when a specified position is invalid.
+class StereoInvalidPositionException implements Exception {
+  /// A message describing the error.
+  String message;
+
+  /// Creates a new [StereoInvalidPositionException] with an optional error
+  /// message.
+  StereoInvalidPositionException([this.message]);
+}
+
 /// Represents an audio player.
 ///
 /// This class is a factory so it has only one instance.
@@ -33,6 +43,9 @@ class Stereo {
   Stereo._internal() {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
+
+  /// Callback called when the playing song ends.
+  VoidCallback completionHandler;
 
   /// Notifier to notify listeners every time the playback duration changes.
   ValueNotifier<Duration> _durationNotifier =
@@ -62,6 +75,12 @@ class Stereo {
   /// Notifier to get notified every time the playback position changes.
   ValueNotifier<Duration> get positionNotifier => _positionNotifier;
 
+  /// Remaining time.
+  ///
+  /// No notifier has been made available for this member since it relies on
+  /// the [durationNotifier] and [positionNotifier] values.
+  Duration get remaining => _durationNotifier.value - _positionNotifier.value;
+
   /// Sets the data source (URI path) to use.
   ///
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
@@ -90,17 +109,34 @@ class Stereo {
     _isPlayingNotifier.value = await _isPlaying();
   }
 
+  /// Seeks to specified time [position].
+  Future seek(Duration position) async {
+    if (position.inSeconds < 0 || position.inSeconds > duration.inSeconds) {
+      throw new StereoInvalidPositionException();
+    }
+
+    await _channel.invokeMethod('app.seek', position.inSeconds);
+  }
+
   /// Stops playback.
   Future stop() async {
     await _channel.invokeMethod('app.stop');
 
+
     _isPlayingNotifier.value = await _isPlaying();
   }
 
+  /// Handles method calls from platform.
   Future _handleMethodCall(MethodCall call) async {
     switch (call.method) {
+      case 'platform.completion':
+        completionHandler();
+        break;
       case 'platform.duration':
         _durationNotifier.value = new Duration(seconds: call.arguments);
+        break;
+      case 'platform.isPlaying':
+        _isPlayingNotifier.value = call.arguments;
         break;
       case 'platform.position':
         _positionNotifier.value = new Duration(seconds: call.arguments);
@@ -110,6 +146,7 @@ class Stereo {
     }
   }
 
+  /// Returns `true` if the player is playing music, `false` otherwise.
   Future<bool> _isPlaying() async {
     return await _channel.invokeMethod('app.isPlaying');
   }

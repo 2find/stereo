@@ -76,6 +76,22 @@
         
         result(nil);
     }
+    // seek() method.
+    else if ([@"app.seek" isEqualToString:call.method]) {
+        if (call.arguments != nil) {
+            if (![call.arguments isKindOfClass:[NSNumber class]]) {
+                result([FlutterError errorWithCode:@"INVALID_POSITION_TYPE" message:@"Position must be specified by an integer." details:nil]);
+            }
+            
+            int seconds = [(NSNumber *)call.arguments intValue];
+            
+            [self _seek:seconds];
+            
+            result(nil);
+        } else {
+            result([FlutterError errorWithCode:@"NO_POSITION" message:@"No position was specified." details:nil]);
+        }
+    }
     // stop() method.
     else if ([@"app.stop" isEqualToString:call.method]) {
         [self _stop];
@@ -115,6 +131,10 @@
     [[[MPRemoteCommandCenter sharedCommandCenter] togglePlayPauseCommand] addTarget:self action:@selector(_notifyPlayPause:)]; */
 }
 
+-(void)_completionHandler:(NSNotification *)notification {
+    [_channel invokeMethod:@"platform.completion" arguments:nil];
+}
+
 - (void)_endAudioSession {
     AVAudioSession *session = [AVAudioSession sharedInstance];
     [session setActive:NO error:nil];
@@ -152,11 +172,18 @@
     int seconds = (int)CMTimeGetSeconds(asset.duration);
     [_channel invokeMethod:@"platform.duration" arguments:@(seconds)];
     
-    // Send position to the application every 300ms.
-    CMTime interval = CMTimeMakeWithSeconds(0.3, NSEC_PER_SEC);
+    // Create a weak reference to `self` so don't go into a retain cycle.
+    // Credits to: https://stackoverflow.com/a/14556706/3238070
+    __unsafe_unretained typeof(self) weakSelf = self;
+    
+    // Send position to the application every 200ms.
+    CMTime interval = CMTimeMakeWithSeconds(0.2, NSEC_PER_SEC);
     _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
-        [self _updatePosition:time];
+        [weakSelf _updatePosition:time];
     }];
+    
+    // Add notification handler when item is done playing.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_completionHandler:) name:AVPlayerItemDidPlayToEndTimeNotification object:item];
     
     return 0;
 }
@@ -181,12 +208,25 @@
     if ([_player currentItem] != nil) {
         _isPlaying = true;
         
-        CMTime interval = CMTimeMakeWithSeconds(0.3, NSEC_PER_SEC);
+        // Create a weak reference to `self` so don't go into a retain cycle.
+        // Credits to: https://stackoverflow.com/a/14556706/3238070
+        __unsafe_unretained typeof(self) weakSelf = self;
+        
+        // Send position to the application every 200ms.
+        CMTime interval = CMTimeMakeWithSeconds(0.2, NSEC_PER_SEC);
         _timeObserver = [_player addPeriodicTimeObserverForInterval:interval queue:nil usingBlock:^(CMTime time) {
-            [self _updatePosition:time];
+            [weakSelf _updatePosition:time];
         }];
         [_player play];
     }
+}
+
+- (void)_seek:(int)seconds {
+    CMTime time = CMTimeMake(seconds, 1);
+    [_player seekToTime:time];
+    
+    // Update position even if the player isn't playing.
+    [_channel invokeMethod:@"platform.position" arguments:@(seconds)];
 }
 
 - (void)_stop {

@@ -19,7 +19,7 @@ EXTERNAL SOURCES:
     :path: /Users/faku99/Development/flutter/stereo/src/ios
 
 SPEC CHECKSUMS:
-  Flutter: d674e78c937094a75ac71dd77e921e840bea3dbf
+  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   stereo: aba9d841525230ab89a93bcbd3079709e899f4c3
 
