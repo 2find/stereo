@@ -86,6 +86,12 @@ class Stereo {
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
   /// a file which is not playable.
   Future load(String uri) async {
+    /* while (uri.substring(0, 1) == '/') {
+      uri = uri.substring(1);
+    } */
+
+    print('[stereo] Loading path: $uri');
+
     int rc = await _channel.invokeMethod('app.load', uri);
 
     _isPlayingNotifier.value = await _isPlaying();
@@ -100,6 +106,14 @@ class Stereo {
     await _channel.invokeMethod('app.pause');
 
     _isPlayingNotifier.value = await _isPlaying();
+  }
+
+  Future<String> picker() async {
+    String result = await _channel.invokeMethod('app.picker');
+
+    print('[stereo] picker returned: $result');
+
+    return result;
   }
 
   /// Starts or resumes playback.

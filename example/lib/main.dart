@@ -53,7 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => _playFile('pi.mp3')),
                 new RaisedButton(
                     child: new Text('Invalid URL'),
-                    onPressed: () => _playFile("invalid_file.mp3"))
+                    onPressed: () => _playFile("invalid_file.mp3")),
+                new RaisedButton(
+                    child: new Text('Pick file'),
+                    onPressed: () =>
+                        _stereo.picker().then((uri) => _playFile(uri, false)))
               ]),
           new Expanded(child: new Container()),
           new Padding(
@@ -61,13 +65,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ]));
   }
 
-  Future _playFile(String file) async {
-    await _copyFiles();
+  Future _playFile(String file, [bool fromAppDir = true]) async {
+    String dir = '';
 
-    final Directory dir = await getApplicationDocumentsDirectory();
+    if (fromAppDir) {
+      await _copyFiles();
+
+      await getApplicationDocumentsDirectory()
+          .then((Directory directory) => dir = directory.path + '/');
+    }
 
     try {
-      await _stereo.load('${dir.path}/$file');
+      await _stereo.load('$dir$file');
     } on StereoFileNotPlayableException {
       var alert = new AlertDialog(
           title: new Text('File not playable'),

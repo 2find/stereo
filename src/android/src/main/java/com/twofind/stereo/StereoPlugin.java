@@ -1,11 +1,22 @@
 package com.twofind.stereo;
 
+import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import java.io.IOException;
@@ -13,19 +24,34 @@ import java.io.IOException;
 /**
  * StereoPlugin
  */
-public class StereoPlugin implements MethodCallHandler {
+public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityResultListener {
   private MediaPlayer mediaPlayer;
   private static MethodChannel channel;
 
+  public static final int REQUEST_CODE_AUDIO = 1;
+
+  // Flutter main activity.
+  private Activity activity;
+
   // To handle position updates.
   private final Handler handler = new Handler();
+
+  // Flutter result.
+  private Result pendingResult;
+
+  public StereoPlugin(Activity activity) {
+    this.activity = activity;
+  }
 
   /**
    * Plugin registration.
    */
   public static void registerWith(Registrar registrar) {
+    StereoPlugin instance = new StereoPlugin(registrar.activity());
+
     channel = new MethodChannel(registrar.messenger(), "com.twofind.stereo");
-    channel.setMethodCallHandler(new StereoPlugin());
+    channel.setMethodCallHandler(instance);
+    registrar.addActivityResultListener(instance);
   }
 
   @Override
@@ -56,6 +82,18 @@ public class StereoPlugin implements MethodCallHandler {
         pause();
 
         result.success(null);
+        break;
+
+      case "app.picker":
+        if (pendingResult != null) {
+          pendingResult.error("MULTIPLE_REQUESTS", "Cannot make multiple requests.", null);
+          pendingResult = null;
+        }
+
+        pendingResult = result;
+
+        picker();
+
         break;
 
       // play() method.
@@ -132,6 +170,13 @@ public class StereoPlugin implements MethodCallHandler {
     }
   }
 
+  private void picker() {
+    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+    intent.setType("audio/*");
+
+    activity.startActivityForResult(Intent.createChooser(intent, "Open audio file"), REQUEST_CODE_AUDIO);
+  }
+
   private void play() {
     if (mediaPlayer != null) {
       // Start sending position to the application.
@@ -184,4 +229,103 @@ public class StereoPlugin implements MethodCallHandler {
       }
     }
   };
+
+  @Override
+  public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    // Result is from the audio picker.
+    if (requestCode == REQUEST_CODE_AUDIO) {
+      if (resultCode == Activity.RESULT_OK) {
+        Uri uri = data.getData();
+
+        // Return path to the library.
+        pendingResult.success(getPath(uri));
+        pendingResult = null;
+      } else {
+        pendingResult.success(null);
+        pendingResult = null;
+
+        return false;
+      }
+    } else {
+      pendingResult.success(null);
+      pendingResult = null;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /*
+   * Credits: https://stackoverflow.com/a/36129285/3238070
+   */
+  private String getPath(Uri uri) {
+    // DocumentProvider.
+    if (DocumentsContract.isDocumentUri(activity, uri)) {
+      final String documentId = DocumentsContract.getDocumentId(uri);
+      final String[] split = documentId.split(":");
+      // final String type = split[0];
+
+      Uri contentUri;
+
+      System.out.println("[getPath] uri: " + uri);
+      System.out.println("[getPath] documentId: " + documentId);
+
+      switch (uri.getAuthority()) {
+        // ExternalStorageProvider
+        case "com.android.externalstorage.documents":
+          return Environment.getExternalStorageDirectory() + "/" + split[1];
+
+        // DownloadsProvider.
+        case "com.android.providers.downloads.documents":
+          // Treat 'raw' files. Don't know if that's the best way to do this, consider it as a temporary fix.
+          if (documentId != null && documentId.startsWith("raw:")) {
+            return documentId.substring("raw:".length());
+          }
+          contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(documentId));
+
+          return getDataColumn(contentUri, null, null);
+
+        // MediaProvider.
+        case "com.android.providers.media.documents":
+          contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+          final String selection = "_id=?";
+          final String[] selectionArgs = new String[] { split[1] };
+
+          return getDataColumn(contentUri, selection, selectionArgs);
+
+        default:
+          return null;
+      }
+    }
+    // Media Store.
+    else if (uri.getScheme().equals("content")) {
+      return getDataColumn(uri, null, null);
+    }
+    // File.
+    else if (uri.getScheme().equals("file")) {
+      return uri.getPath();
+    }
+
+    return null;
+  }
+
+  private String getDataColumn(Uri uri, String selection, String[] selectionArgs) {
+    Cursor cursor = null;
+    final String column = "_data";
+    final String[] projection = new String[] { column };
+
+    try {
+      cursor = activity.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+      if (cursor != null && cursor.moveToFirst()) {
+        return cursor.getString(cursor.getColumnIndexOrThrow(column));
+      }
+    } finally {
+      if (cursor != null) {
+        cursor.close();
+      }
+    }
+
+    return null;
+  }
 }
