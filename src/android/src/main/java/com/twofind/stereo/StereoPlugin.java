@@ -268,9 +268,6 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
 
       Uri contentUri;
 
-      System.out.println("[getPath] uri: " + uri);
-      System.out.println("[getPath] documentId: " + documentId);
-
       switch (uri.getAuthority()) {
         // ExternalStorageProvider
         case "com.android.externalstorage.documents":
