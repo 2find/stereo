@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:stereo/audio_track.dart';
 
 /// Exception thrown when a file is not playable.
 class StereoFileNotPlayableException implements Exception {
@@ -47,7 +48,16 @@ class Stereo {
   /// Callback called when the playing song ends.
   VoidCallback completionHandler;
 
-  /// Notifier to notify listeners every time the playback duration changes.
+  /// Notifies listener every time the playing track changes.
+  ValueNotifier<AudioTrack> _currentTrackNotifier = new ValueNotifier(null);
+
+  /// Current playing track.
+  AudioTrack get currentTrack => _currentTrackNotifier.value;
+
+  /// Notifier to get notified every time the playing track changes.
+  ValueNotifier<AudioTrack> get currentTrackNotifier => _currentTrackNotifier;
+
+  /// Notifies listeners every time the playback duration changes.
   ValueNotifier<Duration> _durationNotifier =
       new ValueNotifier(new Duration(seconds: 0));
 
@@ -57,7 +67,7 @@ class Stereo {
   /// Notifier to get notified every time the playback duration changes.
   ValueNotifier<Duration> get durationNotifier => _durationNotifier;
 
-  /// Notifier to notify listeners every time the Stereo player state changes.
+  /// Notifies listeners every time the Stereo player state changes.
   ValueNotifier<bool> _isPlayingNotifier = new ValueNotifier(false);
 
   /// Whether the Stereo player is playing.
@@ -66,8 +76,9 @@ class Stereo {
   /// Notifier to get notified every time the Stereo player state changes.
   ValueNotifier<bool> get isPlayingNotifier => _isPlayingNotifier;
 
-  /// Notifier to notify listeners every time the playback position changes.
-  ValueNotifier<Duration> _positionNotifier = new ValueNotifier(new Duration(seconds: 0));
+  /// Notifies listeners every time the playback position changes.
+  ValueNotifier<Duration> _positionNotifier =
+      new ValueNotifier(new Duration(seconds: 0));
 
   /// Playback position.
   Duration get position => _positionNotifier.value;
@@ -86,10 +97,6 @@ class Stereo {
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
   /// a file which is not playable.
   Future load(String uri) async {
-    /* while (uri.substring(0, 1) == '/') {
-      uri = uri.substring(1);
-    } */
-
     print('[stereo] Loading path: $uri');
 
     int rc = await _channel.invokeMethod('app.load', uri);
@@ -108,12 +115,16 @@ class Stereo {
     _isPlayingNotifier.value = await _isPlaying();
   }
 
-  Future<String> picker() async {
-    String result = await _channel.invokeMethod('app.picker');
+  /// Shows an UI to pick a track from storage.
+  ///
+  /// Returns an `AudioTrack` if the action was successful, or `null` if the
+  /// user cancelled the action.
+  Future<AudioTrack> picker() async {
+    Map data = await _channel.invokeMethod('app.picker');
 
-    print('[stereo] picker returned: $result');
+    print('[stereo] picker returned: $data');
 
-    return result;
+    return new AudioTrack.fromJson(data);
   }
 
   /// Starts or resumes playback.
@@ -136,7 +147,7 @@ class Stereo {
   Future stop() async {
     await _channel.invokeMethod('app.stop');
 
-
+    _currentTrackNotifier.value = null;
     _isPlayingNotifier.value = await _isPlaying();
   }
 
@@ -145,6 +156,9 @@ class Stereo {
     switch (call.method) {
       case 'platform.completion':
         completionHandler();
+        break;
+      case 'platform.currentTrack':
+        _currentTrackNotifier.value = new AudioTrack.fromJson(call.arguments);
         break;
       case 'platform.duration':
         _durationNotifier.value = new Duration(seconds: call.arguments);

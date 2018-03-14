@@ -1,9 +1,8 @@
 package com.twofind.stereo;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -24,11 +23,12 @@ import java.io.IOException;
 /**
  * StereoPlugin
  */
-public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityResultListener {
+public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityResultListener, PluginRegistry.RequestPermissionsResultListener {
   private MediaPlayer mediaPlayer;
   private static MethodChannel channel;
 
-  public static final int REQUEST_CODE_AUDIO = 1;
+  public static final int REQUEST_PICKER_CODE = 1;
+  public static final int REQUEST_PERMISSIONS_CODE = 2;
 
   // Flutter main activity.
   private Activity activity;
@@ -52,6 +52,7 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
     channel = new MethodChannel(registrar.messenger(), "com.twofind.stereo");
     channel.setMethodCallHandler(instance);
     registrar.addActivityResultListener(instance);
+    registrar.addRequestPermissionsResultListener(instance);
   }
 
   @Override
@@ -151,6 +152,7 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
 
     // Send duration to the application.
     channel.invokeMethod("platform.duration", mediaPlayer.getDuration() / 1000);
+    channel.invokeMethod("platform.currentTrack", AudioTrack.toJson(path));
 
     mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
@@ -171,10 +173,8 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
   }
 
   private void picker() {
-    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-    intent.setType("audio/*");
-
-    activity.startActivityForResult(Intent.createChooser(intent, "Open audio file"), REQUEST_CODE_AUDIO);
+    // Request permissions.
+    activity.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS_CODE);
   }
 
   private void play() {
@@ -232,28 +232,38 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
 
   @Override
   public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-    // Result is from the audio picker.
-    if (requestCode == REQUEST_CODE_AUDIO) {
-      if (resultCode == Activity.RESULT_OK) {
-        Uri uri = data.getData();
+    switch (requestCode) {
+      case REQUEST_PICKER_CODE:
+        if (resultCode == Activity.RESULT_OK) {
+          Uri uri = data.getData();
+          String path = getPath(uri);
 
-        // Return path to the library.
-        pendingResult.success(getPath(uri));
+          // Return metadata to the library.
+          pendingResult.success(AudioTrack.toJson(path));
+          pendingResult = null;
+
+          return true;
+        } else {
+          pendingResult.success(null);
+          pendingResult = null;
+
+          return true;
+        }
+
+      case REQUEST_PERMISSIONS_CODE:
+        System.out.println("Request perm result: " + requestCode);
+
+        pendingResult.success(null);
         pendingResult = null;
-      } else {
+
+        return true;
+
+      default:
         pendingResult.success(null);
         pendingResult = null;
 
         return false;
-      }
-    } else {
-      pendingResult.success(null);
-      pendingResult = null;
-
-      return false;
     }
-
-    return true;
   }
 
   /*
@@ -287,7 +297,7 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
         case "com.android.providers.media.documents":
           contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
           final String selection = "_id=?";
-          final String[] selectionArgs = new String[] { split[1] };
+          final String[] selectionArgs = new String[]{split[1]};
 
           return getDataColumn(contentUri, selection, selectionArgs);
 
@@ -310,7 +320,7 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
   private String getDataColumn(Uri uri, String selection, String[] selectionArgs) {
     Cursor cursor = null;
     final String column = "_data";
-    final String[] projection = new String[] { column };
+    final String[] projection = new String[]{column};
 
     try {
       cursor = activity.getContentResolver().query(uri, projection, selection, selectionArgs, null);
@@ -324,5 +334,26 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
     }
 
     return null;
+  }
+
+  @Override
+  public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] resultCodes) {
+    switch(requestCode) {
+      case REQUEST_PERMISSIONS_CODE:
+        // Permission granted.
+        if (resultCodes[0] == 0) {
+          Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+          intent.setType("audio/*");
+
+          activity.startActivityForResult(Intent.createChooser(intent, "Open audio file"), REQUEST_PICKER_CODE);
+
+          return true;
+        }
+    }
+
+    pendingResult.success(null);
+    pendingResult = null;
+
+    return false;
   }
 }

@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:path_provider/path_provider.dart';
+import 'package:stereo/audio_track.dart';
 
 import 'package:stereo/stereo.dart';
+import 'package:stereo_example/media_info_widget.dart';
 
 import 'package:stereo_example/media_player_widget.dart';
 
@@ -56,10 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => _playFile("invalid_file.mp3")),
                 new RaisedButton(
                     child: new Text('Pick file'),
-                    onPressed: () =>
-                        _stereo.picker().then((uri) => _playFile(uri, false)))
+                    onPressed: () => _stereo.picker().then(
+                        (AudioTrack track) => _playFile(track.path, false)))
               ]),
-          new Expanded(child: new Container()),
+          new MediaInfoWidget(),
           new Padding(
               padding: new EdgeInsets.all(16.0), child: new MediaPlayerWidget())
         ]));
