@@ -1,39 +1,59 @@
 import 'dart:typed_data';
 
+/// Represents a track.
 class AudioTrack {
+  /// Track metadata.
   Map data;
 
-  bool get isValid =>
-      (album != null) && (artist != null) && (path != null) && (title != null);
+  /// Default values to replace fields that are `null` at initialization.
+  static Map defaults = new Map.from({
+    'album'   : 'Unknown album',
+    'artist'  : 'Unknown artist',
+    'artwork' : null,
+    'path'    : null,
+    'title'   : 'Unknown title'
+  });
 
+  /// Track album.
   String get album => data['album'];
 
+  /// Track artist.
   String get artist => data['artist'];
 
-  String get path => data['path'];
-
-  String get title => data['title'];
-
+  /// Track artwork.
   Uint8List get artwork => data['artwork'];
 
+  /// Track path.
+  String get path => data['path'];
+
+  /// Track title.
+  String get title => data['title'];
+
+  /// Creates a track by defining its fields.
+  ///
+  /// If a field is `null`, it will assign its default value as specified in
+  /// the [defaults] static variable.
   AudioTrack(
-      {String title,
+      {String album,
       String artist,
-      String album,
+      Uint8List artwork,
       String path,
-      Uint8List artwork}) {
+      String title}) {
     data = {
-      'title': title,
-      'artist': artist,
-      'album': album,
-      'path': path,
-      'artwork': artwork
+      'album'   : album   ?? defaults['album'],
+      'artwork' : artwork ?? defaults['artwork'],
+      'artist'  : artist  ?? defaults['artist'],
+      'path'    : path    ?? defaults['path'],
+      'title'   : title   ?? defaults['title']
     };
   }
 
-  AudioTrack.fromJson(Map data) : data = data;
-
-  String toString() {
-    return '$title, $album, $artist';
-  }
+  /// Creates a track from existing metadata.
+  AudioTrack.fromJson(Map data)
+      : this(
+            album   : data['album'],
+            artist  : data['artist'],
+            artwork : data['artwork'],
+            path    : data['path'],
+            title   : data['title']);
 }

@@ -32,6 +32,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Stereo _stereo = new Stereo();
 
+  String _errorMsg;
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -58,13 +60,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => _playFile("invalid_file.mp3")),
                 new RaisedButton(
                     child: new Text('Pick file'),
-                    onPressed: () => _stereo.picker().then(
-                        (AudioTrack track) => _playFile(track.path, false)))
+                    onPressed: () => _pickFile())
               ]),
           new MediaInfoWidget(),
           new Padding(
               padding: new EdgeInsets.all(16.0), child: new MediaPlayerWidget())
         ]));
+  }
+
+  Future _pickFile() async {
+    try {
+      AudioTrack track = await _stereo.picker();
+
+      _playFile(track.path, false);
+    } on StereoPermissionsDeniedException catch (_) {
+      print('ERROR: Permissions denied');
+    } on StereoNoTrackSelectedException {
+      print('ERROR: No track selected');
+    }
   }
 
   Future _playFile(String file, [bool fromAppDir = true]) async {

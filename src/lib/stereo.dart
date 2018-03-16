@@ -24,6 +24,26 @@ class StereoInvalidPositionException implements Exception {
   StereoInvalidPositionException([this.message]);
 }
 
+/// Exception thrown when the user denied permissions.
+class StereoPermissionsDeniedException implements Exception {
+  /// A message describing the error.
+  String message;
+
+  /// Creates a new [StereoPermissionsDeniedException] with an optional error
+  /// message.
+  StereoPermissionsDeniedException([this.message]);
+}
+
+/// Exception thrown when the user didn't select a track.
+class StereoNoTrackSelectedException implements Exception {
+  /// A message description the error.
+  String message;
+
+  /// Creates a new [StereoNoTrackSelectedException] with an optional error
+  /// message.
+  StereoNoTrackSelectedException([this.message]);
+}
+
 /// Represents an audio player.
 ///
 /// This class is a factory so it has only one instance.
@@ -117,12 +137,29 @@ class Stereo {
 
   /// Shows an UI to pick a track from storage.
   ///
-  /// Returns an `AudioTrack` if the action was successful, or `null` if the
+  /// Returns an [AudioTrack] if the action was successful, or `null` if the
   /// user cancelled the action.
+  ///
+  /// Throws a [StereoPermissionsDeniedException] if the user denied
+  /// permissions.
+  ///
+  /// Throws a [StereoNoTrackSelectedException] if the user didn't select a
+  /// track.
   Future<AudioTrack> picker() async {
-    Map data = await _channel.invokeMethod('app.picker');
+    Map data;
 
-    print('[stereo] picker returned: $data');
+    try {
+      data = await _channel.invokeMethod('app.picker');
+    } on PlatformException catch (e) {
+      if (e.code == 'STORAGE_PERMISSION_DENIED') {
+        print('throwing shit');
+        throw new StereoPermissionsDeniedException(e.message);
+      } else if (e.code == 'NO_TRACK_SELECTED') {
+        throw new StereoNoTrackSelectedException(e.message);
+      } else {
+        rethrow;
+      }
+    }
 
     return new AudioTrack.fromJson(data);
   }

@@ -19,10 +19,6 @@ public class AudioTrack {
     data.put("path", path);
     data.put("artwork", mmr.getEmbeddedPicture());
 
-    if (data.get("title") == null) {
-      data.put("title", path.substring(path.lastIndexOf('/') + 1));
-    }
-
     mmr.release();
 
     return data;

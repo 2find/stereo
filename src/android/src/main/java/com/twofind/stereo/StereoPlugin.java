@@ -244,24 +244,13 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
 
           return true;
         } else {
-          pendingResult.success(null);
+          pendingResult.error("NO_TRACK_SELECTED", "No track has been selected.", null);
           pendingResult = null;
 
-          return true;
+          return false;
         }
 
-      case REQUEST_PERMISSIONS_CODE:
-        System.out.println("Request perm result: " + requestCode);
-
-        pendingResult.success(null);
-        pendingResult = null;
-
-        return true;
-
       default:
-        pendingResult.success(null);
-        pendingResult = null;
-
         return false;
     }
   }
@@ -348,11 +337,11 @@ public class StereoPlugin implements MethodCallHandler, PluginRegistry.ActivityR
           activity.startActivityForResult(Intent.createChooser(intent, "Open audio file"), REQUEST_PICKER_CODE);
 
           return true;
+        } else {
+          pendingResult.error("STORAGE_PERMISSION_DENIED", "EXTERNAL_STORAGE permission denied by user.", null);
+          pendingResult = null;
         }
     }
-
-    pendingResult.success(null);
-    pendingResult = null;
 
     return false;
   }
