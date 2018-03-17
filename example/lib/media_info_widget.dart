@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stereo/audio_track.dart';
 import 'package:stereo/stereo.dart';
 
 class MediaInfoWidget extends StatefulWidget {

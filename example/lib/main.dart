@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:path_provider/path_provider.dart';
-import 'package:stereo/audio_track.dart';
-
 import 'package:stereo/stereo.dart';
 import 'package:stereo_example/media_info_widget.dart';
 
@@ -31,8 +29,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Stereo _stereo = new Stereo();
-
-  String _errorMsg;
 
   @override
   Widget build(BuildContext context) {
