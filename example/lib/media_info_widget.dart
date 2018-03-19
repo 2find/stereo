@@ -30,26 +30,22 @@ class _MediaInfoState extends State<MediaInfoWidget> {
   }
 
   Widget _getArtwork() {
-    Widget child;
+    Image image;
 
     if (_stereo.currentTrack?.artwork != null) {
-      child = new Image.memory(_stereo.currentTrack.artwork,
-          height: 250.0, width: 250.0);
+      image =
+          new Image.memory(_stereo.currentTrack.artwork, fit: BoxFit.fitHeight);
     } else {
-      child = new Container(
-          width: 250.0,
-          height: 250.0,
-          decoration: new BoxDecoration(color: const Color(0xFF000000)));
+      image = new Image.asset('assets/images/artwork_default.png',
+          fit: BoxFit.fitHeight);
     }
 
-    return child;
-
-    // return new Padding(padding: const EdgeInsets.only(top: 44.0), child: child);
+    return new Expanded(child: image);
   }
 
   Widget _getSubtitleText() {
     return new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 80.0),
+        padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: new Text(
             '${_stereo.currentTrack?.artist ??
                 AudioTrack.defaults['artist']} - ${_stereo.currentTrack
@@ -60,7 +56,7 @@ class _MediaInfoState extends State<MediaInfoWidget> {
 
   Widget _getTitleText() {
     return new Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         child: new Text(
             '${_stereo.currentTrack?.title ?? AudioTrack.defaults['title']}',
             textAlign: TextAlign.center,

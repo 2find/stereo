@@ -113,8 +113,6 @@ class Stereo {
   /// Throws a [StereoFileNotPlayableException] if the specified [uri] points to
   /// a file which is not playable.
   Future load(String uri) async {
-    print('[stereo] Loading path: $uri');
-
     int rc = await _channel.invokeMethod('app.load', uri);
 
     _isPlayingNotifier.value = await _isPlaying();

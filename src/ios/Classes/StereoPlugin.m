@@ -2,12 +2,15 @@
 #import <Flutter/Flutter.h>
 #import <MediaPlayer/MediaPlayer.h>
 
+#import "MCMediaPickerController.h"
 #import "StereoPlugin.h"
 
 @implementation StereoPlugin {
     FlutterMethodChannel *_channel;
+    FlutterViewController *_flutterController;
     BOOL _isPlaying;
     AVPlayer *_player;
+    FlutterResult _result;
     id _timeObserver;
 }
 
@@ -56,7 +59,12 @@
                 result([FlutterError errorWithCode:@"WRONG_FORMAT" message:@"The specified URL must be a string." details:nil]);
             }
 
-            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"file://%@", (NSString *)call.arguments]];
+            NSString *arg = (NSString *)call.arguments;
+            if (![arg hasPrefix:@"ipod-library"]) {
+                [NSString stringWithFormat:@"file://%@", arg];
+            }
+             
+            NSURL *url = [NSURL URLWithString: arg];
 
             result(@([self _loadItemWithURL:url]));
         }
@@ -69,6 +77,17 @@
         [self _pause];
         
         result(nil);
+    }
+    // picker() method.
+    else if ([@"app.picker" isEqualToString:call.method]) {
+        if (_result != nil) {
+            _result([FlutterError errorWithCode:@"MULTIPLE_REQUESTS" message:@"Cannot make multiple requests." details:nil]);
+            
+            _result = nil;
+        }
+        _result = result;
+        
+        [self _picker];
     }
     // play() method.
     else if ([@"app.play" isEqualToString:call.method]) {
@@ -168,6 +187,10 @@
 
     [_player replaceCurrentItemWithPlayerItem:item];
     
+    // Send new track to the application.
+    NSDictionary *metadata = [MCAudioTrack toJson:url];
+    [_channel invokeMethod:@"platform.currentTrack" arguments:metadata];
+    
     // Send new duration to the application.
     int seconds = (int)CMTimeGetSeconds(asset.duration);
     [_channel invokeMethod:@"platform.duration" arguments:@(seconds)];
@@ -202,6 +225,18 @@
     [_player pause];
     [_player removeTimeObserver:_timeObserver];
     _timeObserver = nil;
+}
+
+- (void)_picker {
+    MCMediaPickerController *picker = [[MCMediaPickerController alloc] initWithResult:_result];
+    
+    // If Flutter controller isn't initialized, do it.
+    if (_flutterController == nil) {
+        _flutterController = (FlutterViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
+    }
+    
+    // Show controller.
+    [_flutterController presentViewController:picker animated:YES completion:nil];
 }
 
 - (void)_play {
@@ -241,12 +276,11 @@
 }
 
 - (void)_showMediaPlayerAlert {
-    FlutterViewController *controller = (FlutterViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"There was an error with the music player. Please restart the app." preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *okButton = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
 
     [alert addAction:okButton];
-    [controller presentViewController:alert animated:YES completion:nil];
+    [_flutterController presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)_updatePosition:(CMTime)time {

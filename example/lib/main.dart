@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: new AppBar(title: new Text('Stereo Plugin Example')),
         body: new Column(children: <Widget>[
           new Center(
-              heightFactor: 2.0,
+              heightFactor: 1.5,
               child: new Text('Choose an action:',
                   style: new TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20.0))),
@@ -55,12 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: new Text('Invalid URL'),
                     onPressed: () => _playFile("invalid_file.mp3")),
                 new RaisedButton(
-                    child: new Text('Pick file'),
-                    onPressed: () => _pickFile())
+                    child: new Text('Pick file'), onPressed: () => _pickFile())
               ]),
+          new Container(height: 5.0),
           new MediaInfoWidget(),
           new Padding(
-              padding: new EdgeInsets.all(16.0), child: new MediaPlayerWidget())
+              padding:
+                  new EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: new MediaPlayerWidget())
         ]));
   }
 
@@ -82,8 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (fromAppDir) {
       await _copyFiles();
 
-      await getApplicationDocumentsDirectory()
-          .then((Directory directory) => dir = directory.path + '/');
+      await getApplicationDocumentsDirectory().then(
+          (Directory directory) => dir = 'file://' + directory.path + '/');
     }
 
     try {
