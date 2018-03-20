@@ -5,7 +5,7 @@
     <content url="file://$MODULE_DIR$/android">
       <sourceFolder url="file://$MODULE_DIR$/android/src/main/java" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Android SDK" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Flutter for Android" level="project" />
     <orderEntry type="library" name="flutter" level="project" />

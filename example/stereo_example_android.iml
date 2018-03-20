@@ -19,8 +19,9 @@
       <sourceFolder url="file://$MODULE_DIR$/android/app/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/android/gen" isTestSource="false" generated="true" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 26 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android SDK" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Flutter for Android" level="project" />
+    <orderEntry type="library" name="flutter" level="project" />
   </component>
 </module>
