@@ -1,6 +1,6 @@
 name: stereo
 description: A Flutter plugin for playing music on iOS and Android.
-version: 0.1.0
+version: 1.0.0
 author: 2find Team <faku99dev@gmail.com>
 homepage: https://github.com/2find/stereo
 

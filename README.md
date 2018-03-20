@@ -12,7 +12,17 @@ A Flutter plugin for playing music on iOS and Android.
 
 ## Installation
 
-This section will be covered once the plugin has been published.
+First, add `stereo` as a dependency in your `pubspec.yaml` file.
+
+### Android
+
+Add the following permission to your `AndroidManifest.xml` file:
+* `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>`
+
+### iOS
+
+Add the following key to your `Info.plist` file:
+* `NSAppleMusicUsageDescription`
 
 ## Changelog
 
@@ -22,6 +32,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 Feel free to contribute by opening issues and/or pull requests. Your feedback is very welcome!
 
-## License
+## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) file for more information.
