@@ -2,7 +2,7 @@
 #import <Flutter/Flutter.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-#import "MCMediaPickerController.h"
+#import "STMediaPickerController.h"
 #import "StereoPlugin.h"
 
 @implementation StereoPlugin {
@@ -188,7 +188,7 @@
     [_player replaceCurrentItemWithPlayerItem:item];
     
     // Send new track to the application.
-    NSDictionary *metadata = [MCAudioTrack toJson:url];
+    NSDictionary *metadata = [STAudioTrack toJson:url];
     [_channel invokeMethod:@"platform.currentTrack" arguments:metadata];
     
     // Send new duration to the application.
@@ -228,7 +228,7 @@
 }
 
 - (void)_picker {
-    MCMediaPickerController *picker = [[MCMediaPickerController alloc] initWithResult:_result];
+    STMediaPickerController *picker = [[STMediaPickerController alloc] initWithResult:_result];
     
     // If Flutter controller isn't initialized, do it.
     if (_flutterController == nil) {

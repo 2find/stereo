@@ -7,14 +7,14 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `/Users/faku99/opt/flutter/bin/cache/artifacts/engine/ios`)
-  - path_provider (from `/Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.1+1/ios`)
+  - path_provider (from `/Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.2/ios`)
   - stereo (from `/Users/faku99/Development/flutter/stereo/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: /Users/faku99/opt/flutter/bin/cache/artifacts/engine/ios
   path_provider:
-    :path: /Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.1+1/ios
+    :path: /Users/faku99/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.2/ios
   stereo:
     :path: /Users/faku99/Development/flutter/stereo/ios
 
