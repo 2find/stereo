@@ -2,26 +2,26 @@ name: stereo_example
 description: Demonstrates how to use the stereo plugin.
 
 dependencies:
+  font_awesome_flutter: "^6.0.0"
+  intl: "^0.15.2"
+  path_provider: "^0.2.1+1"
   flutter:
-    sdk: flutter
-  font_awesome_flutter: 4.7.2
-  intl: ^0.15.2
-  path_provider: 0.2.1+1
+      sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   stereo:
-    path: ../src
+    path: ..
 
 flutter:
   assets:
     - assets/images/artwork_default.png
     - assets/songs/dubstep.mp3
     - assets/songs/pi.mp3
-  fonts:
-    - family: FontAwesome
-      fonts:
-        - asset: packages/font_awesome_flutter/fonts/fontawesome.woff
   uses-material-design: true
+
+environment:
+  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  flutter: ">=0.1.4 <2.0.0"

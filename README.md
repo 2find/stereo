@@ -1,21 +1,37 @@
 # Stereo plugin for Flutter
 
-A Flutter plugin for playing music from a file.
+A Flutter plugin for playing music on iOS and Android.
 
-## Organization
+## Features
 
-There are three main folders in this repository.
-
-* `doc/`: Documentation.
-* `example/`: Example that demonstrates how to use the plugin.
-* `src/`: Source code.
-
-The folders `example` and `src` contain `.iml` files that each represents an IntelliJ IDEA module.
+* Play/pause
+* Stop
+* Duration / seek to position
+* Load track from path
+* Load track from library
 
 ## Installation
 
-This section will be covered once the plugin has been published.
+First, add `stereo` as a dependency in your `pubspec.yaml` file.
+
+### Android
+
+Add the following permission to your `AndroidManifest.xml` file:
+* `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>`
+
+### iOS
+
+Add the following key to your `Info.plist` file:
+* `NSAppleMusicUsageDescription`
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 
 Feel free to contribute by opening issues and/or pull requests. Your feedback is very welcome!
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) file for more information.
