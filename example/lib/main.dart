@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:path_provider/path_provider.dart';
-
 import 'package:stereo/stereo.dart';
+import 'package:stereo_example/media_info_widget.dart';
 
 import 'package:stereo_example/media_player_widget.dart';
 
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: new AppBar(title: new Text('Stereo Plugin Example')),
         body: new Column(children: <Widget>[
           new Center(
-              heightFactor: 2.0,
+              heightFactor: 1.5,
               child: new Text('Choose an action:',
                   style: new TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20.0))),
@@ -53,21 +53,43 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => _playFile('pi.mp3')),
                 new RaisedButton(
                     child: new Text('Invalid URL'),
-                    onPressed: () => _playFile("invalid_file.mp3"))
+                    onPressed: () => _playFile("invalid_file.mp3")),
+                new RaisedButton(
+                    child: new Text('Pick file'), onPressed: () => _pickFile())
               ]),
-          new Expanded(child: new Container()),
+          new Container(height: 5.0),
+          new MediaInfoWidget(),
           new Padding(
-              padding: new EdgeInsets.all(16.0), child: new MediaPlayerWidget())
+              padding:
+                  new EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+              child: new MediaPlayerWidget())
         ]));
   }
 
-  Future _playFile(String file) async {
-    await _copyFiles();
+  Future _pickFile() async {
+    try {
+      AudioTrack track = await _stereo.picker();
 
-    final Directory dir = await getApplicationDocumentsDirectory();
+      _playFile(track.path, false);
+    } on StereoPermissionsDeniedException catch (_) {
+      print('ERROR: Permissions denied');
+    } on StereoNoTrackSelectedException {
+      print('ERROR: No track selected');
+    }
+  }
+
+  Future _playFile(String file, [bool fromAppDir = true]) async {
+    String dir = '';
+
+    if (fromAppDir) {
+      await _copyFiles();
+
+      await getApplicationDocumentsDirectory().then(
+          (Directory directory) => dir = 'file://' + directory.path + '/');
+    }
 
     try {
-      await _stereo.load('${dir.path}/$file');
+      await _stereo.load('$dir$file');
     } on StereoFileNotPlayableException {
       var alert = new AlertDialog(
           title: new Text('File not playable'),
