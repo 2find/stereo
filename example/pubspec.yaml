@@ -1,5 +1,8 @@
 name: stereo_example
 description: Demonstrates how to use the stereo plugin.
+version: 1.0.0
+author: 2find Team <2findteam@googlegroups.com>
+homepage: https://github.com/2find/stereo/example
 
 dependencies:
   font_awesome_flutter: "^6.0.0"
@@ -7,13 +10,11 @@ dependencies:
   path_provider: "^0.2.1+1"
   flutter:
       sdk: flutter
+  stereo: "^1.0.0"
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  stereo:
-    path: ..
 
 flutter:
   assets:

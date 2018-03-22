@@ -7,11 +7,11 @@ class AudioTrack {
 
   /// Default values to replace fields that are `null` at initialization.
   static Map defaults = new Map.from({
-    'album'   : 'Unknown album',
-    'artist'  : 'Unknown artist',
-    'artwork' : null,
-    'path'    : null,
-    'title'   : 'Unknown title'
+    'album': 'Unknown album',
+    'artist': 'Unknown artist',
+    'artwork': null,
+    'path': null,
+    'title': 'Unknown title'
   });
 
   /// Track album.
@@ -40,20 +40,20 @@ class AudioTrack {
       String path,
       String title}) {
     data = {
-      'album'   : album   ?? defaults['album'],
-      'artwork' : artwork ?? defaults['artwork'],
-      'artist'  : artist  ?? defaults['artist'],
-      'path'    : path    ?? defaults['path'],
-      'title'   : title   ?? defaults['title']
+      'album': album ?? defaults['album'],
+      'artwork': artwork ?? defaults['artwork'],
+      'artist': artist ?? defaults['artist'],
+      'path': path ?? defaults['path'],
+      'title': title ?? defaults['title']
     };
   }
 
   /// Creates a track from existing metadata.
   AudioTrack.fromJson(Map data)
       : this(
-            album   : data['album'],
-            artist  : data['artist'],
-            artwork : data['artwork'],
-            path    : data['path'],
-            title   : data['title']);
+            album: data['album'],
+            artist: data['artist'],
+            artwork: data['artwork'],
+            path: data['path'],
+            title: data['title']);
 }
