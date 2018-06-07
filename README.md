@@ -44,3 +44,11 @@ Feel free to contribute by opening issues and/or pull requests. Your feedback is
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) file for more information.
+
+## Credits
+
+Stereo has been developed and is maintained by **faku99**, **ludelafo** and **Daxidz**.
+
+In no particular order, we credit the following people for their invaluable contributions:
+
+* **joelfaul** for fixing an interference with the [audio_recorder](https://pub.dartlang.org/packages/audio_recorder) library
