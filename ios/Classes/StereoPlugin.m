@@ -36,7 +36,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Begin audio session.
-    [self _beginAudioSession];
+    // [self _beginAudioSession];
 
     return YES;
 }
@@ -166,6 +166,11 @@
 }
 
 - (int)_loadItemWithURL:(NSURL * _Nonnull)url {
+
+    if (_player == nil) {
+      [self _beginAudioSession];
+    }
+
     [self _pause];
 
     AVAsset *asset = [AVAsset assetWithURL:url];
