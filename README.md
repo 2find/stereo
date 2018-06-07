@@ -24,11 +24,6 @@ Add the following permission to your `AndroidManifest.xml` file:
 Add the following key to your `Info.plist` file:
 * `NSAppleMusicUsageDescription`
 
-## Documentation
-
-Since [pub.dartlang.org](pub.dartlang.org) doesn't support `dartdoc` 2.0 yet,
-we hosted the [documentation](https://2find.github.io/stereo/) in the mean time.
-
 ## Example
 
 See the [example documentation](example/README.md) for more information.
