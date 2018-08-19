@@ -5,7 +5,7 @@
 #import "STMediaPickerController.h"
 #import "StereoPlugin.h"
 
-@implementation StereoPlugin {
+@implementation STStereoPlugin {
     FlutterMethodChannel *_channel;
     FlutterViewController *_flutterController;
     BOOL _isPlaying;
@@ -16,13 +16,13 @@
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"com.twofind.stereo" binaryMessenger:[registrar messenger]];
-    StereoPlugin* instance = [[StereoPlugin alloc] initWithChannel:channel];
+    STStereoPlugin* instance = [[STStereoPlugin alloc] initWithChannel:channel];
 
     [registrar addMethodCallDelegate:instance channel:channel];
     [registrar addApplicationDelegate:instance];
 }
 
-- (StereoPlugin *)initWithChannel:(FlutterMethodChannel * _Nonnull)channel {
+- (STStereoPlugin *)initWithChannel:(FlutterMethodChannel * _Nonnull)channel {
     self = [super init];
 
     if (self) {
