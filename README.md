@@ -24,11 +24,6 @@ Add the following permission to your `AndroidManifest.xml` file:
 Add the following key to your `Info.plist` file:
 * `NSAppleMusicUsageDescription`
 
-## Documentation
-
-Since [pub.dartlang.org](pub.dartlang.org) doesn't support `dartdoc` 2.0 yet,
-we hosted the [documentation](https://2find.github.io/stereo/) in the mean time.
-
 ## Example
 
 See the [example documentation](example/README.md) for more information.
@@ -44,3 +39,11 @@ Feel free to contribute by opening issues and/or pull requests. Your feedback is
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) file for more information.
+
+## Credits
+
+Stereo has been developed and is maintained by **faku99**, **ludelafo** and **Daxidz**.
+
+In no particular order, we credit the following people for their invaluable contributions:
+
+* **joelfaul** for fixing an interference with the [audio_recorder](https://pub.dartlang.org/packages/audio_recorder) library
