@@ -5,9 +5,9 @@ author: 2find Team <2findteam@googlegroups.com>
 homepage: https://github.com/2find/stereo/example
 
 dependencies:
-  font_awesome_flutter: "^6.0.0"
+  font_awesome_flutter: "^8.0.1"
   intl: "^0.15.2"
-  path_provider: "^0.2.1+1"
+  path_provider: "^0.4.1"
   flutter:
       sdk: flutter
   stereo: "^1.0.0"
