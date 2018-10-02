@@ -35,9 +35,8 @@
 #pragma mark - UIApplicationDelegate methods
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Begin audio session.
-    [self _beginAudioSession];
 
+    // Don't begin audio session until we need it so that it doesn't interfere with recording
     return YES;
 }
 
@@ -166,7 +165,12 @@
 }
 
 - (int)_loadItemWithURL:(NSURL * _Nonnull)url {
-    [self _pause];
+
+    if (_player == nil) {
+      [self _beginAudioSession];
+    } else {
+      [self _pause];
+    }
 
     AVAsset *asset = [AVAsset assetWithURL:url];
     NSArray *assetKeys = @[@"playable", @"hasProtectedContent"];
@@ -273,6 +277,8 @@
     [_channel invokeMethod:@"platform.position" arguments:@(0)];
     
     _isPlaying = false;
+
+    [self _endAudioSession];
 }
 
 - (void)_showMediaPlayerAlert {
