@@ -2,8 +2,8 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <UIKit/UIKit.h>
 
-@interface StereoPlugin : NSObject <FlutterPlugin>
+@interface STStereoPlugin : NSObject <FlutterPlugin>
 
-- (StereoPlugin * _Nonnull)initWithChannel:(FlutterMethodChannel * _Nonnull)channel;
+- (STStereoPlugin * _Nonnull)initWithChannel:(FlutterMethodChannel * _Nonnull)channel;
 
 @end
